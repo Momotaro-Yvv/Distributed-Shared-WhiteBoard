@@ -1,16 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.distributedsharedwhiteboard.HelloController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.HelloController">
+    <right>
+        <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="560.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <items>
+                <ListView prefHeight="200.0" prefWidth="200.0" />
+                <VBox>
+                    <children>
+                        <ListView fx:id="MsgHistory" />
+                        <HBox spacing="5.0" VBox.vgrow="NEVER">
+                            <children>
+                                <TextField fx:id="message" onAction="#handleSendMessageAction" />
+                                <Button fx:id="sendMessageButton" mnemonicParsing="false" onAction="#handleSendMessageAction" prefHeight="23.0" prefWidth="80.0" text="send" />
+                            </children>
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                            </padding>
+                        </HBox>
+                    </children>
+                </VBox>
+            </items>
+        </SplitPane>
+    </right>
+    <center>
+        <Pane fx:id="canvas" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" onMousePressed="#handleDrawAction" onMouseDragged="#handleDrawAction" onMouseReleased="#handleDrawAction">
+            <children>
+                <Line fx:id="line" endX="436.29998779296875" endY="302.4000244140625" startX="365.6929016113281" startY="253.60000610351562" />
+            </children>
+        </Pane>
+    </center>
+    <top>
+        <ToolBar prefHeight="40.0" prefWidth="900.0" BorderPane.alignment="CENTER">
+            <items>
+                <MenuButton fx:id="fileButton" mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="New" />
+                        <MenuItem mnemonicParsing="false" text="Save" />
+                        <MenuItem mnemonicParsing="false" text="SaveAs" />
+                    </items>
+                </MenuButton>
+                <Button fx:id="quitButton" mnemonicParsing="false" onAction="#handleQuitButtonAction" text="Quit" />
+                <Label text="Color">
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                </Label>
+                <ColorPicker fx:id="colorPicker" promptText="Color" />
+                <Label text="DrawMode">
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                </Label>
+                <ChoiceBox prefWidth="150.0" value="Free hand">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Free hand" />
+                            <String fx:value="Text" />
+                            <String fx:value="Line" />
+                            <String fx:value="Circle" />
+                            <String fx:value="Triangle" />
+                            <String fx:value="Rectangle" />
+                        </FXCollections>
+                    </items>
+                </ChoiceBox>
+            </items>
+        </ToolBar>
+    </top>
+</BorderPane>
