@@ -10,4 +10,6 @@ module com.example.distributedsharedwhiteboard {
     opens com.example.distributedsharedwhiteboard.server to javafx.fxml;
     exports com.example.distributedsharedwhiteboard.client;
     opens com.example.distributedsharedwhiteboard.client to javafx.fxml;
+    exports com.example.distributedsharedwhiteboard.Application;
+    opens com.example.distributedsharedwhiteboard.Application to javafx.fxml;
 }

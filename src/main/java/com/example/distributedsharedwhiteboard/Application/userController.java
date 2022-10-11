@@ -1,17 +1,20 @@
-package com.example.distributedsharedwhiteboard;
+package com.example.distributedsharedwhiteboard.Application;
 
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Line;
 
-public class HelloController {
+
+/**
+ * A controller that handle both manager and user operation for the WhiteBoard Application
+ */
+public class userController {
     @FXML
     private TextField message;
 

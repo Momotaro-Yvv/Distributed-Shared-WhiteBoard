@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
 
-<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.HelloController">
+<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.userController">
     <right>
         <SplitPane dividerPositions="0.5" orientation="VERTICAL" prefHeight="560.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>

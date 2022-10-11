@@ -1,4 +1,4 @@
 package com.example.distributedsharedwhiteboard.client;
 
-public class RemoteObjImplement {
+public class JoinWhiteBoard {
 }

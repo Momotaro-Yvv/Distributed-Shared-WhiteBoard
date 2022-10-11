@@ -1,6 +1,6 @@
 package com.example.distributedsharedwhiteboard;
 
-public class logger implements ILogger {
+public class Logger implements ILogger {
 
     @Override
     public void logInfo(String msg) {
