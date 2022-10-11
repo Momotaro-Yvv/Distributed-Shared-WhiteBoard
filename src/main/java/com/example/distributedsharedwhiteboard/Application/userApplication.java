@@ -13,7 +13,7 @@ public class userApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(userApplication.class.getResource("hello-view_user.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        scene.getStylesheets().add(Objects.requireNonNull(userApplication.class.getResource("styleSheet.css")).toString());
+//        scene.getStylesheets().add(Objects.requireNonNull(userApplication.class.getResource("styleSheet.css")).toString());
 
         stage.setTitle("WhiteBoard - User Window");
         stage.setScene(scene);
