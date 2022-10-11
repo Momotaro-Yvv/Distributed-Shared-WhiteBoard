@@ -2,6 +2,7 @@ module com.example.distributedsharedwhiteboard {
     requires javafx.controls;
     requires javafx.fxml;
     requires java.rmi;
+    requires json.simple;
 
 
     opens com.example.distributedsharedwhiteboard to javafx.fxml;
