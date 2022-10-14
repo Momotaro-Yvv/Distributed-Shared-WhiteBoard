@@ -1,6 +1,6 @@
 package com.example.distributedsharedwhiteboard.Application;
 
-import javafx.collections.ObservableList;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -11,8 +11,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
-import java.lang.Math;
-import javafx.application.Platform;
 
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
@@ -62,6 +60,16 @@ public class userController {
     private GraphicsContext gc;
 
     private double startX, startY, endX, endY;
+
+
+//        /*
+//         * On enter the application , Log some information about the configuration settings.
+//         */
+//        System.out.println(welcome);
+//        System.out.println("using internet address ["+address.getHostName()+":"+port+"]");
+//        System.out.println("using basedir ["+dir+"] - all filenames will be relative to this basedir");
+//        System.out.println("using sharer secret ["+secret+"]");
+//        System.out.println("socket timeout ["+timeout+"]");
 
     // This allows the implementing class to perform any necessary post-processing on the content.
     // It also provides the controller with access to the resources that were used to load the

@@ -1,6 +1,7 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.Shape.Shape;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -12,13 +13,17 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**
+ * The main class for the White Board Server
+ */
 public class Server {
 
-    static UserList userList;
-    static String svrIPAddress;
-    static int svrPort;
-    static Logger logger = new Logger();
-    static String welcomeMsg = " --- Welcome to DS White Board Server ---";
+    private static UserList userList;
+    private static ObjectsList objectsList;
+    private static String svrIPAddress;
+    private static int svrPort;
+    static Logger svrLogger = new Logger();
+    final static String welcomeMsg = " --- Welcome to Distributed Share White Board Server ---";
 
     public static void main(String[] args) {
         // parse command line arguments, save server ip & port
@@ -27,25 +32,26 @@ public class Server {
 
         //initialize an empty user list for tracking clients
         userList = new UserList();
+        objectsList = new ObjectsList();
 
         ServerSocketFactory factory = ServerSocketFactory.getDefault();
         try(ServerSocket server = factory.createServerSocket(svrPort)){
 
-            logger.logInfo("Server - ["+svrIPAddress+":"+svrPort+"]");
-            logger.logInfo("Waiting for client connection..");
+            svrLogger.logInfo("Server - ["+svrIPAddress+":"+svrPort+"] is open,");
+            svrLogger.logInfo("Waiting for client connection..");
 
             // Wait for connections.
             while(true){
                 Socket client = server.accept();
-                logger.logDebug("A new user has been connected");
+                svrLogger.logInfo("A new user has been connected");
 
                 // Start a new thread for each connection
-                Thread t = new Thread(() -> serveClient(client));
-                t.start();
+                Thread newThread = new Thread(() -> serveClient(client));
+                newThread.start();
             }
 
         } catch (IOException e) {
-            logger.logError("Failed to create Server Socket, please try again.");
+            svrLogger.logError("Failed to create Server Socket, please try again.");
             e.printStackTrace();
         }
     }
@@ -54,31 +60,28 @@ public class Server {
     {
         try(Socket clientSocket = client)
         {
-            logger.logDebug("Serving Client");
+            String clientIp = client.getInetAddress().getHostAddress();
+            svrLogger.logDebug("Under new server thread, now processing Client request on connection" + clientIp);
 
-            // The JSON Parser
             JSONParser parser = new JSONParser();
-            // Input stream
             DataInputStream input = new DataInputStream(clientSocket.getInputStream());
-            // Output Stream
             DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
 
             String clientMsg = input.readUTF();
-            logger.logDebug("FROM CLIENT: "+ clientMsg );
-
+            svrLogger.logDebug("MESSAGE FROM CLIENT: "+ clientMsg );
             JSONObject command = (JSONObject) parser.parse(clientMsg);
-            Integer requested_id = parseCommand(command);
 
-            output.writeUTF("Server: Assignment id:" +requested_id +  welcomeMsg);
-            // Receive more data..
+            Integer client_id = parseLoginCommand(command);
+            output.writeUTF(welcomeMsg + "\n Assigned client id: " + client_id);
+
+            // Waiting for more message from Client
             while(true){
                 if(input.available() > 0){
                     // Attempt to convert read data to JSON
                     JSONObject commands_object = (JSONObject) parser.parse(input.readUTF());
-                    System.out.println("COMMAND RECEIVED: "+commands_object.toJSONString());
+                    svrLogger.logDebug("MESSAGE FROM CLIENT: "+commands_object.toJSONString());
                     JSONObject resObj = new JSONObject();
-                    resObj.put("result", handleCommand(commands_object));
-
+                    resObj.put("MESSAGE FROM CLIENT: ", handleCommand(commands_object));
                     output.writeUTF(resObj.toJSONString());
                 }
             }
@@ -102,53 +105,70 @@ public class Server {
                 svrIPAddress = serverAddress;
                 svrPort = prt;
             } catch (NumberFormatException e) {
-                logger.logError("Server port number should be an integer");
+                svrLogger.logError("Server port number should be an integer");
                 System.exit(1);
             }
         } else {
-            logger.logWarn("Received Wrong arguments.\n" +
+            svrLogger.logWarn("Received Wrong arguments.\n" +
                     "A default server address and port will be used");
         }
     }
 
     /**
-     * This function will deal with clients' initial login and return
+     * This function will deal with clients' initial login
      * @param command
      * @return 0 if failed to parse command, otherwise user/manager id should be larger than 0
+     * TODO: make CreateWB and JoinWB transparently call each other
      */
-    private static int parseCommand(JSONObject command) {
+    private static int parseLoginCommand(JSONObject command) {
 
         if (command.containsKey("command_name")) {
-            logger.logDebug("IT HAS A COMMAND NAME");
+            svrLogger.logDebug("IT HAS A COMMAND NAME");
         }
 
         // If it is CreateWhiteBoard command, save this client as manager, and add to User list
         // return managerId
         if (command.get("command_name").equals("CreateWhiteBoard")) {
-            int managerId = 0;
             if (userList.getListSize() == 0) {
-                String managerName = (String) command.get("name");
-                managerId = userList.addManager(managerName);
+                createWhiteBoard(command);
             } else {
-                logger.logError("This White Board already have a manager. Please try other server port");
+                joinWhiteBoard(command);
             }
-            return managerId;
         }
 
         // If it is JoinWhiteBoard command, add to User list for new users.
         if (command.get("command_name").equals("JoinWhiteBoard")) {
-            int userId = 0;
-            String userName = (String) command.get("name");
-
-            // check if this user already contained in User list,
-            // if not, create a new unique identifier,
-            if (!userList.checkAUser(userName)) {
-                userId = userList.addAUser(userName);
-                logger.logDebug("A new user" + userId + " " + userName + "has been added");
+            if (userList.getListSize() > 0) {
+                joinWhiteBoard(command);
+            } else {
+                createWhiteBoard(command);
             }
-            return userId;
         }
         return 0;
+    }
+
+
+    private static int createWhiteBoard(JSONObject command){
+        int managerId = 0;
+        if (userList.getListSize() == 0) {
+            String managerName = (String) command.get("name");
+            managerId = userList.addManager(managerName);
+        } else {
+            svrLogger.logError("This White Board already have a manager. Please try other server port");
+        }
+        return managerId;
+    }
+    private static int joinWhiteBoard(JSONObject command){
+        int userId = 0;
+        String userName = (String) command.get("name");
+
+        // check if this user already contained in User list,
+        // if not, create a new unique identifier,
+        if (!userList.checkAUser(userName)) {
+            userId = userList.addAUser(userName);
+            svrLogger.logDebug("A new user" + userId + " " + userName + "has been added");
+        }
+        return userId;
     }
 
     /**
@@ -157,32 +177,35 @@ public class Server {
      * @return
      */
     private static String handleCommand(JSONObject commands){
+        String commandName = commands.get("command_name").toString();
+        switch(commandName)
+            {
+                case "drawRequest":
+                    Shape x = (Shape) commands.get("shape");
+                    objectsList.addAnObject(x);
+                    break;
+                case "kickOutUser":
+                    int managerId = (int) commands.get("managerid");
+                    int userid = (int) commands.get("kickwho");
+                    userList.deleteAUser(managerId, userid);
+                    break;
+                case "eraseRequest":
+                    Shape x1 = (Shape) commands.get("shape");
+                    objectsList.deleteAnObject(x1);
+                    break;
+
+                default:
+                    try
+                    {
+                        throw new Exception();
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+            }
+
         return null;
     }
 
-            // Initialize a unique identifier for each user
-//            Math math = new Math();
-//            Integer firstInt = Integer.parseInt(command.get("first_integer").toString());
-//            Integer secondInt = Integer.parseInt(command.get("second_integer").toString());
 //
-//            switch((String) command.get("method_name"))
-//            {
-//                case "add":
-//                    result = math.add(firstInt,secondInt);
-//                    break;
-//                case "multiply":
-//                    result = math.multiply(firstInt,secondInt);
-//                    break;
-//                case "subtract":
-//                    result = math.subtract(firstInt,secondInt);
-//                    break;
-//                default:
-//                    try
-//                    {
-//                        throw new Exception();
-//                    } catch (Exception e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//            }
 }

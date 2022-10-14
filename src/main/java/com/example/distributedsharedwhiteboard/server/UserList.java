@@ -12,7 +12,7 @@ public class UserList {
     // keep record the number of users joined, including deleted ones
     private static int counter = 0;
 
-    Logger logger = new Logger();
+    Logger logger = Server.svrLogger;
     private static HashMap<Integer,String> users;
 
     public UserList() {
