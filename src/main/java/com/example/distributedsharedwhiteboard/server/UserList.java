@@ -39,8 +39,8 @@ public class UserList {
         return (Set<String>) users.values();
     }
 
-    public boolean checkAUser (String userid){
-        if (users.containsKey(userid)){
+    public boolean checkAUser (String username){
+        if (users.containsValue(username)){
             return true;
         }
         return false;

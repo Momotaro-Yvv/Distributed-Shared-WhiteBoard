@@ -19,6 +19,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Polygon?>
@@ -26,7 +27,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.userController">
+<BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.userController">
     <right>
         <SplitPane orientation="VERTICAL" prefHeight="560.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
@@ -44,7 +45,13 @@
                                 </Text>
                             </children>
                         </VBox>
-                        <ListView />
+                        <ListView>
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin></ListView>
                         <VBox prefHeight="17.0" prefWidth="199.0">
                             <children>
                                 <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Chat" textAlignment="CENTER" wrappingWidth="198.4248046875">
@@ -54,7 +61,10 @@
                                 </Text>
                             </children>
                         </VBox>
-                        <ListView fx:id="MsgHistory" />
+                        <ListView fx:id="MsgHistory">
+                     <VBox.margin>
+                        <Insets left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin></ListView>
                         <HBox spacing="5.0" VBox.vgrow="NEVER">
                             <children>
                                 <TextField fx:id="msg" />
@@ -84,7 +94,10 @@
                         <Insets left="20.0" />
                     </padding>
                 </Label>
-                <ColorPicker fx:id="colorPicker" promptText="Color" />
+                <ColorPicker fx:id="colorPicker" promptText="Color">
+               <value>
+                  <Color />
+               </value></ColorPicker>
                 <Label text="DrawMode">
                     <padding>
                         <Insets left="20.0" />
@@ -125,7 +138,7 @@
                         <Cursor fx:constant="DEFAULT" />
                     </cursor>
                 </Region>
-                <Button alignment="TOP_RIGHT" mnemonicParsing="false" text="Quit" onAction="#handleQuit" />
+                <Button alignment="TOP_RIGHT" mnemonicParsing="false" onAction="#handleQuit" text="Quit" />
             </items>
         </ToolBar>
     </top>

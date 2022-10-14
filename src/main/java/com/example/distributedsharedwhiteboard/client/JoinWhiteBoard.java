@@ -14,34 +14,51 @@ import java.net.UnknownHostException;
  */
 public class JoinWhiteBoard {
 
+    private static String userName;
+    private static InetAddress srvAddress;
+    private static int srvPort;
+
+    public static String getUserName() {
+        return userName;
+    }
+
+    public static InetAddress getSrvAddress() {
+        return srvAddress;
+    }
+
+    public static int getSrvPort() {
+        return srvPort;
+    }
+
     public static void main(String[] args) throws UnknownHostException {
-
-        // Default settings
-        InetAddress localAddress = InetAddress.getByName("localhost");
-        int localPort = 3201;
-        InetAddress srvAddress = InetAddress.getByName("localhost");
-        int srvPort = 3000;
-
-
         // Parse Command Line Arguments
-        if (args.length == 2){
-            String serverAddress = args[0];
-            String serverPort = args[1];
+        if (args.length == 3){
+            String arg1 = args[0];
+            String arg2 = args[1];
+            String arg3 = args[2];
             try {
-                srvPort = Integer.parseInt(serverPort);
+                srvPort = Integer.parseInt(arg2);
             } catch (NumberFormatException e) {
-                System.out.println("Server port number should be an integer");
+                System.out.println("WRONG FORMAT: Server port number should be an integer");
                 System.exit(1);
             }
-            srvAddress = InetAddress.getByName(serverAddress);
-            String[] arguments = new String[] {srvAddress.toString(), String.valueOf(srvPort)};
+            try {
+                srvAddress = InetAddress.getByName(arg1);
+            } catch (UnknownHostException e){
+                System.out.println("No IP address for the host could be found");
+                System.exit(1);
+            }
+            userName = arg3;
 
-            UserApplication.main(arguments);
+            UserApplication.main(args);
+
         } else {
             System.out.println("Received Wrong arguments.\n" +
                     "A default server address and port will be used");
         }
 
+
     }
+
 
 }

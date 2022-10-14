@@ -12,6 +12,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
+// FIXME: after resize the window, need to resize the panel as well
+
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
  */
@@ -36,7 +38,6 @@ public class userController {
     private Canvas canvas;
 
     // shapes for drawing
-
     @FXML
     private Line line;
 
@@ -62,21 +63,11 @@ public class userController {
     private double startX, startY, endX, endY;
 
 
-//        /*
-//         * On enter the application , Log some information about the configuration settings.
-//         */
-//        System.out.println(welcome);
-//        System.out.println("using internet address ["+address.getHostName()+":"+port+"]");
-//        System.out.println("using basedir ["+dir+"] - all filenames will be relative to this basedir");
-//        System.out.println("using sharer secret ["+secret+"]");
-//        System.out.println("socket timeout ["+timeout+"]");
-
     // This allows the implementing class to perform any necessary post-processing on the content.
     // It also provides the controller with access to the resources that were used to load the
     // document and the location that was used to resolve relative paths within the document
     // (commonly equivalent to the location of the document itself).
     public void initialize() {
-
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
 
@@ -90,6 +81,7 @@ public class userController {
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
+        MsgHistory = new ListView<>();
     }
 
     @FXML
@@ -289,4 +281,7 @@ public class userController {
         }
     }
 
+    public ListView getMsgHistory() {
+        return MsgHistory;
+    }
 }

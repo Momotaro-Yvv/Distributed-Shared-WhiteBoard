@@ -61,7 +61,7 @@ public class Server {
         try(Socket clientSocket = client)
         {
             String clientIp = client.getInetAddress().getHostAddress();
-            svrLogger.logDebug("Under new server thread, now processing Client request on connection" + clientIp);
+            svrLogger.logDebug("Under new server thread, now processing Client request on connection " + clientIp);
 
             JSONParser parser = new JSONParser();
             DataInputStream input = new DataInputStream(clientSocket.getInputStream());
@@ -73,6 +73,11 @@ public class Server {
 
             Integer client_id = parseLoginCommand(command);
             output.writeUTF(welcomeMsg + "\n Assigned client id: " + client_id);
+            JSONObject newCommand = new JSONObject();
+            newCommand.put("userid", client_id);
+            // Send message to Client
+            output.writeUTF(newCommand.toJSONString());
+            output.flush();
 
             // Waiting for more message from Client
             while(true){
@@ -80,8 +85,9 @@ public class Server {
                     // Attempt to convert read data to JSON
                     JSONObject commands_object = (JSONObject) parser.parse(input.readUTF());
                     svrLogger.logDebug("MESSAGE FROM CLIENT: "+commands_object.toJSONString());
+
                     JSONObject resObj = new JSONObject();
-                    resObj.put("MESSAGE FROM CLIENT: ", handleCommand(commands_object));
+                    resObj.put("MESSAGE FROM SERVER: ", handleCommand(commands_object));
                     output.writeUTF(resObj.toJSONString());
                 }
             }
@@ -129,6 +135,7 @@ public class Server {
         // If it is CreateWhiteBoard command, save this client as manager, and add to User list
         // return managerId
         if (command.get("command_name").equals("CreateWhiteBoard")) {
+            svrLogger.logDebug("Client want to create a White Board");
             if (userList.getListSize() == 0) {
                 createWhiteBoard(command);
             } else {
@@ -138,6 +145,7 @@ public class Server {
 
         // If it is JoinWhiteBoard command, add to User list for new users.
         if (command.get("command_name").equals("JoinWhiteBoard")) {
+            svrLogger.logDebug("Client want to join a White Board");
             if (userList.getListSize() > 0) {
                 joinWhiteBoard(command);
             } else {
@@ -160,13 +168,13 @@ public class Server {
     }
     private static int joinWhiteBoard(JSONObject command){
         int userId = 0;
-        String userName = (String) command.get("name");
+        String userName = (String) command.get("username");
 
         // check if this user already contained in User list,
         // if not, create a new unique identifier,
         if (!userList.checkAUser(userName)) {
             userId = userList.addAUser(userName);
-            svrLogger.logDebug("A new user" + userId + " " + userName + "has been added");
+            svrLogger.logDebug("A new user: ID:  " + userId + " Username " + userName + " has been added");
         }
         return userId;
     }
@@ -207,5 +215,21 @@ public class Server {
         return null;
     }
 
-//
+    // Getter methods
+    public static UserList getUserList() {
+        return userList;
+    }
+
+    public static ObjectsList getObjectsList() {
+        return objectsList;
+    }
+
+    public static String getSvrIPAddress() {
+        return svrIPAddress;
+    }
+
+    public static int getSvrPort() {
+        return svrPort;
+    }
+
 }
