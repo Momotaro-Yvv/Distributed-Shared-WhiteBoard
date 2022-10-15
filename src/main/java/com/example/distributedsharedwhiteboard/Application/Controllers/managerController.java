@@ -1,19 +1,18 @@
 package com.example.distributedsharedwhiteboard.Application.Controllers;
 
-import java.io.File;
-
+import com.example.distributedsharedwhiteboard.Application.userController;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.stage.FileChooser;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
-import javafx.stage.Stage;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
+import java.io.File;
 import java.io.IOException;
-import javafx.stage.FileChooser.ExtensionFilter;
 import java.time.LocalDateTime;
 
 public class managerController extends userController {
