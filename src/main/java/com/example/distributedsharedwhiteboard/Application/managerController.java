@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
@@ -14,18 +16,24 @@ import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.IOException;
 import javafx.stage.FileChooser.ExtensionFilter;
+import java.time.LocalDateTime;
 
 public class managerController extends userController{
 
     @FXML
-    protected Stage stage;
+    protected ListView<String> userList;
 
     @FXML
     protected void handleSaveAs(ActionEvent event) {
 
         FileChooser savefile = new FileChooser();
-        savefile.setSelectedExtensionFilter(new ExtensionFilter("Image Files", "*.png", "*.jpg"));
+
+        savefile.getExtensionFilters().addAll(
+                new ExtensionFilter("Image Files", "*.png", "*.jpg"),
+                new ExtensionFilter("All Files", "*.*"));
+        savefile.setSelectedExtensionFilter(savefile.getExtensionFilters().get(0));
         savefile.setTitle("Save File");
+        savefile.setInitialFileName("untitled-" + LocalDateTime.now().getNano());
 
         File file = savefile.showSaveDialog(stage);
         if (file != null) {

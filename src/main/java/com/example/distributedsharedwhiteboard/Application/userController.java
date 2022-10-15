@@ -12,6 +12,29 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
+import java.io.File;
+import java.io.FileInputStream;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.stage.FileChooser;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.WritableImage;
+import javafx.scene.Node;
+import javafx.stage.Stage;
+import javax.imageio.ImageIO;
+import java.awt.image.RenderedImage;
+import java.io.IOException;
+import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyEvent;
+import javafx.event.EventHandler;
+import javafx.scene.input.KeyCode;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 // FIXME: after resize the window, need to resize the panel as well
 
 /**
@@ -20,10 +43,16 @@ import javafx.scene.text.Text;
 public class userController {
 
     @FXML
+    protected Stage stage;
+
+    @FXML
     protected TextField msg;
 
     @FXML
     protected ListView<String> MsgHistory;
+
+    @FXML
+    protected ListView<String> userList;
 
     @FXML
     protected ColorPicker colorPicker;
@@ -67,6 +96,10 @@ public class userController {
     // document and the location that was used to resolve relative paths within the document
     // (commonly equivalent to the location of the document itself).
     public void initialize() {
+
+        //set the default stage
+        this.stage = stage;
+
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
 
@@ -80,6 +113,17 @@ public class userController {
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
+
+        // test drawText
+        TextField tf = new TextField();
+        tf.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> ob, String o, String n) {
+                tf.setPrefColumnCount(tf.getText().length());
+            }
+        });
+        pane.getChildren().add(tf);
+
     }
 
     @FXML
