@@ -4,7 +4,6 @@ import com.example.distributedsharedwhiteboard.Application.UserApplication;
 import com.example.distributedsharedwhiteboard.message.JoinRequest;
 import com.example.distributedsharedwhiteboard.util;
 import javafx.application.Application;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -76,8 +75,6 @@ public class JoinWhiteBoard {
 
         } catch (IOException e) {
             System.out.println("Client received IO exception on socket.");
-            throw new RuntimeException(e);
-        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
         // launch user application

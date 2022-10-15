@@ -1,4 +1,15 @@
 package com.example.distributedsharedwhiteboard.message;
 
-public class QuitMsg {
+@JsonSerializable
+public class QuitMsg extends Message{
+
+    @JsonElement
+    public Integer userId;
+
+    public QuitMsg(){};
+
+    public QuitMsg(Integer userId){
+        this.userId = userId;
+    };
+
 }

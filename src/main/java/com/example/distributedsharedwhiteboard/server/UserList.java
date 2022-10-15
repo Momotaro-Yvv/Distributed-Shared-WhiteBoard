@@ -46,6 +46,16 @@ public class UserList {
         return false;
     }
 
+    public boolean userQuit (Integer userId){
+        if (users.containsKey(userId)){
+            users.remove(userId);
+            return true;
+        } else{
+            logger.logDebug("User was not in UserList anyway...");
+            return false;
+        }
+    }
+
     public boolean deleteAUser (int managerId, int userid){
         Boolean success = false;
         if (managerId == managerID) {

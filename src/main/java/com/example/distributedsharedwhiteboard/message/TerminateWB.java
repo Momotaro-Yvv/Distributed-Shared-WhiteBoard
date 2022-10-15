@@ -1,4 +1,15 @@
 package com.example.distributedsharedwhiteboard.message;
 
-public class TerminateWB {
+@JsonSerializable
+public class TerminateWB extends Message{
+
+    @JsonElement
+    public Integer managerId;
+
+    public TerminateWB(){};
+
+    public TerminateWB(Integer managerId){
+        this.managerId = managerId;
+    };
+
 }

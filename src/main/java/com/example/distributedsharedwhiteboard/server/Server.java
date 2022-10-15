@@ -4,8 +4,6 @@ import com.example.distributedsharedwhiteboard.Logger;
 import com.example.distributedsharedwhiteboard.Shape.Shape;
 import com.example.distributedsharedwhiteboard.message.*;
 import com.example.distributedsharedwhiteboard.util;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
 import javax.net.ServerSocketFactory;
 import java.io.*;
@@ -63,7 +61,7 @@ public class Server {
         }
     }
 
-    private static void serveClient(Socket client) throws IOException {
+    private static void serveClient(Socket client) {
         try(Socket clientSocket = client) {
             String clientIp = client.getInetAddress().getHostAddress();
             int clientPort = client.getPort();
@@ -110,8 +108,7 @@ public class Server {
                     };
 
                     // process the request message
-                    String msgname = msg.getClass().getName();
-                    handleCommand(bufferedWriter,msgname);
+                    handleCommand(bufferedWriter,msg);
                 }
             }
         } catch (IOException e) {
@@ -147,6 +144,7 @@ public class Server {
             svrLogger.logWarn("WRONG ARGUMENT NUMBER: Please strictly follow format <server address> <server port> ");
             System.exit(1);
         }
+        return false;
     }
 
     /**
@@ -198,28 +196,33 @@ public class Server {
 
     /**
      * Handling other requests from clients
-     * @param commands
      * @return
      */
-    private static void handleCommand(BufferedWriter bufferedWriter, String command){
-
+    private static void handleCommand(BufferedWriter bufferedWriter, Message message){
+        String command = message.getClass().getName();
         switch(command) {
-            case DrawRequest.class.getName():
-                Shape x = (Shape) commands.get("shape");
+            case "DrawRequest":
+                DrawRequest message1 = (DrawRequest) message;
+                Shape x = message1.shape;
                 objectsList.addAnObject(x);
+//              util.writeMsg(); to all users in userList
                 break;
-            case KickRequest.class.getName():
-                int managerId = (int) commands.get("managerid");
-                int userid = (int) commands.get("kickwho");
+            case "KickRequest":
+                KickRequest message2 = (KickRequest) message;
+                int managerId = message2.managerId;
+                int userid = message2.userId;
                 userList.deleteAUser(managerId, userid);
+//              util.writeMsg(); to all users in userList
                 break;
-            case QuitMsg.class.getName():
-                Shape x1 = (Shape) commands.get("shape");
-                objectsList.deleteAnObject(x1);
+            case "QuitMsg":
+                QuitMsg message3 = (QuitMsg) message;
+                Integer userId = message3.userId;
+                userList.userQuit(userId);
+//              util.writeMsg(); to all users in userList
                 break;
-            case TerminateWB.class.getName():
-                Shape x1 = (Shape) commands.get("shape");
-                objectsList.deleteAnObject(x1);
+            case "TerminateWB":
+                TerminateWB message4 = (TerminateWB) message;
+//              util.writeMsg(); Goodbye to all users in userList
                 break;
 
             default:
@@ -241,7 +244,7 @@ public class Server {
         return objectsList;
     }
 
-    public static String getSvrIPAddress() {
+    public static InetAddress getSvrIPAddress() {
         return svrIPAddress;
     }
 
