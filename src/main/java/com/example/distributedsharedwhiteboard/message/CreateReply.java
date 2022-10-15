@@ -1,4 +1,15 @@
 package com.example.distributedsharedwhiteboard.message;
 
-public class CreateReply {
+@JsonSerializable
+public class CreateReply extends Message{
+
+    @JsonElement
+    public Integer userId;
+
+    public CreateReply(){};
+
+    public CreateReply(Integer userId){
+        this.userId = userId;
+    };
+
 }

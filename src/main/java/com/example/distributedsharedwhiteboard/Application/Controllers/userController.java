@@ -1,6 +1,11 @@
-package com.example.distributedsharedwhiteboard.Application;
+package com.example.distributedsharedwhiteboard.Application.Controllers;
 
+import com.example.distributedsharedwhiteboard.Application.Models.User;
+import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -12,8 +17,17 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
 
-// FIXME: after resize the window, need to resize the panel as well
+import java.net.InetAddress;
+import java.util.List;
 
+// FIXME:
+// 1. bind view under userController - Yvonne
+// 2. communication between server and clients through Message
+// 3. use Json as ObjectList format -hai
+//4. dialoge ui and controller-hai
+// 5. Json Factory -hai
+//5. Exception handling -hai, Yvonne
+//6. a method used to transfer shape to Json, another a method used to transfer back
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
  */
@@ -25,6 +39,7 @@ public class userController {
     @FXML
     protected ListView<String> MsgHistory;
 
+    protected ListView<String> UserList;
     @FXML
     protected ColorPicker colorPicker;
 
@@ -62,11 +77,48 @@ public class userController {
 
     private double startX, startY, endX, endY;
 
+    //Model
+    User user;
+    private String userName;
+    InetAddress srvAddress;
+    int srvPort;
+
+    // message list
+    private ObservableList<String> msgList = FXCollections.observableArrayList();
+
+    // user list
+    private ObservableList<String> userList = FXCollections.observableArrayList();
+
     // This allows the implementing class to perform any necessary post-processing on the content.
     // It also provides the controller with access to the resources that were used to load the
     // document and the location that was used to resolve relative paths within the document
     // (commonly equivalent to the location of the document itself).
     public void initialize() {
+
+        user = new User(srvAddress, srvPort, userName);
+
+        //link user with View
+//        UserList.textProperty().bind(user.userlist);
+////        MsgHistory
+//        ObjectsList =pane.getChildren();
+
+
+        // get controller
+        userController controller = (userController)fxmlLoader.getController();
+
+        // bind variables
+        Bindings.bindContentBidirectional(msgList, controller.getMsgHistory().getItems());
+        msgList.add("test only"); // now can access msgHistory via msgList
+
+        Bindings.bindContentBidirectional(userList, controller.getUserList().getItems());
+        userList.add("User 0");
+
+        Application.Parameters params = getParameters();
+        List<String> list = params.getRaw();
+        controller.setUserName(list.get(2));
+        controller.setSrvPort(Integer.parseInt(list.get(1)));
+        controller.setSrvAddress(InetAddress.getByName(list.get(0)));
+
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
 
@@ -280,5 +332,25 @@ public class userController {
                     break;
             }
         }
+    }
+
+    public ListView<String> getMsgHistory() {
+        return MsgHistory;
+    }
+
+    public ListView<String> getUserList() {
+        return UserList;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public void setSrvAddress(InetAddress srvAddress) {
+        this.srvAddress = srvAddress;
+    }
+
+    public void setSrvPort(int srvPort) {
+        this.srvPort = srvPort;
     }
 }

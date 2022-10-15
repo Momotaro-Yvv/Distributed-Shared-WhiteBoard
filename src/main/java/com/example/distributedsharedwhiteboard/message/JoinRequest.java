@@ -1,4 +1,13 @@
 package com.example.distributedsharedwhiteboard.message;
 
-public class JoinRequest {
+@JsonSerializable
+public class JoinRequest extends Message{
+    @JsonElement
+    public String username;
+
+    public JoinRequest() {};
+    public JoinRequest(String username){
+        this.username = username;
+    }
+
 }
