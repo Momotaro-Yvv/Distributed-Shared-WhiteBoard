@@ -2,6 +2,8 @@ package com.example.distributedsharedwhiteboard.client;
 
 import com.example.distributedsharedwhiteboard.Application.UserApplication;
 
+import javafx.application.Application;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -50,14 +52,14 @@ public class JoinWhiteBoard {
             }
             userName = arg3;
 
-            UserApplication.main(args);
 
         } else {
             System.out.println("Received Wrong arguments.\n" +
                     "A default server address and port will be used");
         }
 
-
+        // launch user application
+        Application.launch(UserApplication.class, args);
     }
 
 

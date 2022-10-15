@@ -20,48 +20,47 @@ import javafx.scene.text.Text;
 public class userController {
 
     @FXML
-    private TextField msg;
+    protected TextField msg;
 
     @FXML
-    private ListView MsgHistory;
+    protected ListView<String> MsgHistory;
 
     @FXML
-    private ColorPicker colorPicker;
+    protected ColorPicker colorPicker;
 
     @FXML
-    private ToggleGroup drawMode;
+    protected ToggleGroup drawMode;
 
     @FXML
-    private Pane pane;
+    protected Pane pane;
 
     @FXML
-    private Canvas canvas;
+    protected Canvas canvas;
 
     // shapes for drawing
     @FXML
-    private Line line;
+    protected Line line;
 
     @FXML
-    private Text text;
+    protected Text text;
 
     @FXML
-    private Circle circle;
+    protected Circle circle;
 
     @FXML
-    private Rectangle rectangle;
+    protected Rectangle rectangle;
 
     @FXML
-    private Path path;
+    protected Path path;
 
     @FXML
-    private Polygon polygon;
+    protected Polygon polygon;
 
-    private String modeID;
+    protected String modeID;
 
-    private GraphicsContext gc;
+    protected GraphicsContext gc;
 
     private double startX, startY, endX, endY;
-
 
     // This allows the implementing class to perform any necessary post-processing on the content.
     // It also provides the controller with access to the resources that were used to load the
@@ -81,7 +80,6 @@ public class userController {
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
-        MsgHistory = new ListView<>();
     }
 
     @FXML
@@ -90,11 +88,14 @@ public class userController {
         // get msg
         String input = msg.getText();
 
+
         // check if text is empty
         if (input != null && input.length() != 0) {
 
+            System.out.println(input);
+
             // add msg to message history
-            MsgHistory.getItems().addAll("user54686: " + input);
+            MsgHistory.getItems().add("user54686: " + input);
 
             // clear input
             msg.clear();
@@ -279,9 +280,5 @@ public class userController {
                     break;
             }
         }
-    }
-
-    public ListView getMsgHistory() {
-        return MsgHistory;
     }
 }

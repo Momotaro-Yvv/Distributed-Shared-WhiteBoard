@@ -2,13 +2,17 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
+<?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ColorPicker?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -16,46 +20,55 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
+<?import javafx.scene.shape.Circle?>
 <?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Polygon?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.userController">
+<BorderPane xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.managerController">
     <right>
         <SplitPane orientation="VERTICAL" prefHeight="560.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
                 <VBox>
                     <children>
-                  <VBox prefHeight="18.0" prefWidth="198.0">
-                     <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="User list" textAlignment="CENTER" textOrigin="CENTER" wrappingWidth="191.72900390625">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </VBox.margin>
-                        </Text>
-                     </children>
-                  </VBox>
-                      <ListView />
-                  <VBox prefHeight="17.0" prefWidth="199.0">
-                     <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Chat" textAlignment="CENTER" wrappingWidth="198.4248046875">
-                           <font>
-                              <Font size="15.0" />
-                           </font>
-                           <VBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </VBox.margin>
-                        </Text>
-                     </children>
-                  </VBox>
-                        <ListView fx:id="MsgHistory" />
+                        <VBox prefHeight="18.0" prefWidth="198.0">
+                            <children>
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="User list" textAlignment="CENTER" wrappingWidth="189.33398818969727">
+                                    <VBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                    </VBox.margin>
+                                    <font>
+                                        <Font size="15.0" />
+                                    </font>
+                                </Text>
+                            </children>
+                        </VBox>
+                        <ListView>
+                            <opaqueInsets>
+                                <Insets />
+                            </opaqueInsets>
+                            <VBox.margin>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                            </VBox.margin></ListView>
+                        <VBox prefHeight="17.0" prefWidth="199.0">
+                            <children>
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Chat" textAlignment="CENTER" wrappingWidth="198.4248046875">
+                                    <font>
+                                        <Font size="15.0" />
+                                    </font>
+                                </Text>
+                            </children>
+                        </VBox>
+                        <ListView fx:id="MsgHistory">
+                            <VBox.margin>
+                                <Insets left="5.0" right="5.0" top="5.0" />
+                            </VBox.margin></ListView>
                         <HBox spacing="5.0" VBox.vgrow="NEVER">
                             <children>
-                                <TextField fx:id="message" onAction="#handleSendMessageAction" />
-                                <Button fx:id="sendMessageButton" mnemonicParsing="false" onAction="#handleSendMessageAction" prefHeight="23.0" prefWidth="80.0" text="send" />
+                                <TextField fx:id="msg" />
+                                <Button mnemonicParsing="false" onAction="#handleSendMsg" prefHeight="23.0" prefWidth="80.0" text="send" />
                             </children>
                             <padding>
                                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
@@ -66,39 +79,74 @@
             </items>
         </SplitPane>
     </right>
-    <center>
-        <Pane fx:id="canvas" onMouseDragged="#handleDrawAction" onMousePressed="#handleDrawAction" onMouseReleased="#handleDrawAction" BorderPane.alignment="CENTER">
-            <children>
-                <Line fx:id="line" endX="436.29998779296875" endY="302.4000244140625" startX="365.6929016113281" startY="253.60000610351562" />
-            </children>
-        </Pane>
-    </center>
     <top>
-        <ToolBar BorderPane.alignment="CENTER">
+        <ToolBar fx:id="toolbar" prefHeight="40.0" prefWidth="900.0" BorderPane.alignment="CENTER">
             <items>
                 <MenuButton fx:id="fileButton" mnemonicParsing="false" text="File">
                     <items>
                         <MenuItem mnemonicParsing="false" text="New" />
                         <MenuItem mnemonicParsing="false" text="Save" />
-                        <MenuItem mnemonicParsing="false" text="SaveAs" />
+                        <MenuItem mnemonicParsing="false" text="SaveAs" onAction="#handleSaveAs"/>
                     </items>
                 </MenuButton>
-                <ColorPicker fx:id="colorPicker" prefHeight="23.0" prefWidth="89.0" promptText="Color">
-               <value>
-                  <Color />
-               </value></ColorPicker>
-            <Button mnemonicParsing="false" text="Free Draw" />
-            <Button mnemonicParsing="false" text="Line" />
-            <Button mnemonicParsing="false" text="Circle" />
-            <Button mnemonicParsing="false" text="Triangle" />
-            <Button mnemonicParsing="false" text="Rectangle" />
-            <Region blendMode="RED" maxWidth="1.7976931348623157E308" prefHeight="23.0" prefWidth="181.0">
-               <cursor>
-                  <Cursor fx:constant="DEFAULT" />
-               </cursor>
-            </Region>
-                <Button fx:id="quitButton" alignment="TOP_RIGHT" mnemonicParsing="false" onAction="#handleQuitButtonAction" text="Close" />
+                <Label text="Color">
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                </Label>
+                <ColorPicker fx:id="colorPicker" promptText="Color">
+                    <value>
+                        <Color />
+                    </value></ColorPicker>
+                <Label text="DrawMode">
+                    <padding>
+                        <Insets left="20.0" />
+                    </padding>
+                </Label>
+                <ToggleButton fx:id="dm_free" mnemonicParsing="false" text="freehand">
+                    <toggleGroup>
+                        <ToggleGroup fx:id="drawMode" />
+                    </toggleGroup>
+                </ToggleButton>
+                <ToggleButton fx:id="dm_text" mnemonicParsing="false" text="T" toggleGroup="$drawMode">
+                    <font>
+                        <Font name="System Bold" size="11.0" />
+                    </font>
+                </ToggleButton>
+                <ToggleButton fx:id="dm_line" mnemonicParsing="false" toggleGroup="$drawMode">
+                    <graphic>
+                        <Line endX="10.0" startY="10.0" />
+                    </graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="dm_circle" mnemonicParsing="false" toggleGroup="$drawMode">
+                    <graphic>
+                        <Circle fill="#1f93ff00" radius="8.0" stroke="BLACK" strokeType="INSIDE" />
+                    </graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="dm_triangle" mnemonicParsing="false" toggleGroup="$drawMode">
+                    <graphic>
+                        <Polygon fill="#1f93ff00" points="-50.0, 40.0, -33.399986267089844, 40.0, -41.399986267089844, 24.800018310546875" stroke="BLACK" strokeType="INSIDE" />
+                    </graphic>
+                </ToggleButton>
+                <ToggleButton fx:id="dm_rectangle" mnemonicParsing="false" toggleGroup="$drawMode">
+                    <graphic>
+                        <Rectangle arcHeight="1.0" arcWidth="1.0" fill="#1f93ff00" height="15.0" stroke="BLACK" strokeType="INSIDE" width="15.0" />
+                    </graphic>
+                </ToggleButton>
+                <Region blendMode="RED" maxWidth="1.7976931348623157E308" prefHeight="30.0" prefWidth="300.0">
+                    <cursor>
+                        <Cursor fx:constant="DEFAULT" />
+                    </cursor>
+                </Region>
+                <Button alignment="TOP_RIGHT" mnemonicParsing="false" onAction="#handleQuit" text="Quit" />
             </items>
         </ToolBar>
     </top>
+    <center>
+        <Pane fx:id="pane" onMouseDragged="#handleDraw" onMousePressed="#handleDraw" onMouseReleased="#handleDraw">
+            <children>
+                <Canvas fx:id="canvas" height="560.0" width="700.0" />
+            </children>
+        </Pane>
+    </center>
 </BorderPane>
