@@ -5,8 +5,6 @@ package com.example.distributedsharedwhiteboard.Shape;
  */
 public class Shape {
 
-    int X;
-    int Y;
     public Shape() {
     }
 
