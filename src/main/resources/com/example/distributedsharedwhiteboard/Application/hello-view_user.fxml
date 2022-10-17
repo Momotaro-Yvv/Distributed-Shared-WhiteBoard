@@ -43,7 +43,7 @@
                                 </Text>
                             </children>
                         </VBox>
-                        <ListView>
+                        <ListView fx:id="userList">
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
@@ -89,7 +89,7 @@
                <value>
                   <Color />
                </value></ColorPicker>
-                <Label text="DrawMode">
+                <Label text="DrawMode: ">
                     <padding>
                         <Insets left="20.0" />
                     </padding>
@@ -129,7 +129,7 @@
                         <Cursor fx:constant="DEFAULT" />
                     </cursor>
                 </Region>
-                <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleQuit" text="Quit" />
+                <Button fx:id="QuitButton" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleQuit" text="Quit" />
             </items>
         </ToolBar>
     </top>

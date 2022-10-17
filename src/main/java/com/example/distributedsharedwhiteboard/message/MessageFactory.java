@@ -1,5 +1,9 @@
 package com.example.distributedsharedwhiteboard.message;
 
+import com.example.distributedsharedwhiteboard.Util.JsonElement;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationInit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +14,7 @@ import java.util.Objects;
 /**
  * A factory class to serialize and deserialize JSONSerializable
  * classes to and from strings.
- * @author aaron
+ * Source Code: Aaron Harwood - DS Project 1 P2P File Sharing System
  *
  */
 public class MessageFactory {

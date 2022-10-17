@@ -1,9 +1,10 @@
 package com.example.distributedsharedwhiteboard.server;
 
-import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.*;
 import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
+import com.example.distributedsharedwhiteboard.Util.util;
 import com.example.distributedsharedwhiteboard.message.*;
-import com.example.distributedsharedwhiteboard.util;
 
 import javax.net.ServerSocketFactory;
 import java.io.*;
@@ -13,17 +14,21 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
-import static com.example.distributedsharedwhiteboard.util.writeMsg;
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 /**
  * The main class for the White Board Server
  */
 public class Server {
 
-    private static UserList userList;
-    private static ObjectsList objectsList;
     private static InetAddress svrIPAddress;
     private static int svrPort;
+
+    private static UserList userList;
+    private static ObjectsList objectsList;
+    private static MsgList msgList;
+
+
     static Logger svrLogger = new Logger();
     final static String welcomeMsg = " --- Welcome to Distributed Share White Board Server ---";
 
@@ -36,7 +41,6 @@ public class Server {
 
             //initialize an empty user list for tracking clients
             userList = new UserList();
-            objectsList = new ObjectsList();
 
             ServerSocketFactory factory = ServerSocketFactory.getDefault();
             try (ServerSocket server = factory.createServerSocket(svrPort)) {
@@ -84,7 +88,7 @@ public class Server {
             svrLogger.logDebug("MESSAGE FROM CLIENT: "+ msgFromClient);
 
             Boolean success = false;
-            if (msgFromClient.getClass().getName() == CreateReply.class.getName()){
+            if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
                 success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientIp, clientPort);
             } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
                 success = handleJoinRequest(bufferedWriter, (JoinRequest) msgFromClient, clientIp, clientPort);
@@ -116,10 +120,10 @@ public class Server {
         }
     }
 
+
     /**
-     * This function will check if the args format is correct,
-     * if correct, set input as server port number, and return True
-     * otherwise, use default setting 127.0.0.1: 3000
+     * This function will check if the Command line args format is correct,
+     * if correct format, set up server as input, and return true otherwise false
      * @param args Arguments from command line when run this Server
      */
     private static Boolean parseArgs(String[] args){
@@ -147,9 +151,12 @@ public class Server {
         return false;
     }
 
+
     /**
-     * This function will deal with manager' initial login
-     * @return false if failed to parse command, otherwise true and send CreateReply
+     * This function will deal with manager's initial Create WB request,
+     * if the White Board already has a manager, then the server will send back ErrorMsg
+     * Otherwise a new objects list and message History list will be initialised
+     * @return true and send back CreateReply if the request successful start the WB, otherwise false
      */
     private static boolean handleCreateRequest(BufferedWriter bufferedWriter, CreateRequest msg,String ip, int port)
             throws IOException {
@@ -158,16 +165,22 @@ public class Server {
         if (userList.getListSize() == 0) {
             String managerName = msg.username;
             int managerId = userList.addManager(managerName);
+            objectsList = new ObjectsList();
+            msgList = new MsgList();
             writeMsg(bufferedWriter,new CreateReply(managerId));
             return true;
         } else {
-            svrLogger.logError("This White Board already have a manager. Please try other server port");
+            String errorMsg = "This White Board already have a manager. Please try other server port";
+            util.writeMsg(bufferedWriter,new ErrorMsg(errorMsg));
             return false;
         }
     }
 
     /**
-     * This function will deal with users' initial login
+     * This function will deal with users' initial Join WB request,
+     * If the WB hasn't had the manager then the
+     * {@link handleCreateRequest} will be transparently called,
+     * otherwise this user will be added to existed userList
      * @return false if failed to parse command, otherwise true and send JoinReply
      */
     private static boolean handleJoinRequest(BufferedWriter bufferedWriter,JoinRequest msg,String ip, int port)
@@ -182,7 +195,6 @@ public class Server {
                 writeMsg(bufferedWriter, new JoinReply(userId));
                 return true;
             } else {
-                svrLogger.logDebug("The White board does not owned by a manager yet, transparently call handleCreateRequest");
                 writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
                 return false;
             }
@@ -202,9 +214,9 @@ public class Server {
         String command = message.getClass().getName();
         switch(command) {
             case "DrawRequest":
-                DrawRequest message1 = (DrawRequest) message;
-                Shape x = message1.shape;
-                objectsList.addAnObject(x);
+                DrawRequest drawRequest = (DrawRequest) message;
+                Shape newShape = drawRequest.shape;
+                objectsList.addAnObject(newShape);
 //              util.writeMsg(); to all users in userList
                 break;
             case "KickRequest":

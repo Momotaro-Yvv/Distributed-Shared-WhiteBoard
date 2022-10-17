@@ -16,4 +16,6 @@ module com.example.distributedsharedwhiteboard {
     opens com.example.distributedsharedwhiteboard.Application to javafx.fxml;
     exports com.example.distributedsharedwhiteboard.Application.Controllers;
     opens com.example.distributedsharedwhiteboard.Application.Controllers to javafx.fxml;
+    exports com.example.distributedsharedwhiteboard.Util;
+    opens com.example.distributedsharedwhiteboard.Util to javafx.fxml;
 }

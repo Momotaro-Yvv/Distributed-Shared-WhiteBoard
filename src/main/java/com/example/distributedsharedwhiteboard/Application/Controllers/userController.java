@@ -1,6 +1,9 @@
-package com.example.distributedsharedwhiteboard.Application;
+package com.example.distributedsharedwhiteboard.Application.Controllers;
 
+import com.example.distributedsharedwhiteboard.Application.Models.User;
+import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -11,49 +14,22 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
 import javafx.scene.text.Text;
-
-import java.io.File;
-import java.io.FileInputStream;
-
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.stage.FileChooser;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.WritableImage;
-import javafx.scene.Node;
 import javafx.stage.Stage;
-import javax.imageio.ImageIO;
-import java.awt.image.RenderedImage;
-import java.io.IOException;
-import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyEvent;
-import javafx.event.EventHandler;
-import javafx.scene.input.KeyCode;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 
-// FIXME: after resize the window, need to resize the panel as well
 
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
  */
 public class userController {
-
     @FXML
     protected Stage stage;
 
     @FXML
     protected TextField msg;
-
     @FXML
     protected ListView<String> MsgHistory;
-
     @FXML
     protected ListView<String> userList;
-
     @FXML
     protected ColorPicker colorPicker;
 
@@ -91,11 +67,25 @@ public class userController {
 
     private double startX, startY, endX, endY;
 
+    //Model
+    private User user;
+
     // This allows the implementing class to perform any necessary post-processing on the content.
     // It also provides the controller with access to the resources that were used to load the
     // document and the location that was used to resolve relative paths within the document
     // (commonly equivalent to the location of the document itself).
     public void initialize() {
+        user = JoinWhiteBoard.getUser();
+        // bind variables
+        Bindings.bindContentBidirectional(MsgHistory.getItems(), user.getMsgList());
+        user.addMsgItem("test only : message"); // now can access msgHistory via msgList
+
+        Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
+        user.addUserItem("Test only : user1");
+
+        Bindings.bindContentBidirectional( user.getObjectList(),pane.getChildren());
+        com.example.distributedsharedwhiteboard.Shape.Circle circle1 = new com.example.distributedsharedwhiteboard.Shape.Circle(1, 1, 1);
+        user.addObjectItem(circle1);
 
         //set the default stage
         this.stage = stage;
@@ -115,14 +105,14 @@ public class userController {
         polygon = new Polygon();
 
         // test drawText
-        TextField tf = new TextField();
-        tf.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> ob, String o, String n) {
-                tf.setPrefColumnCount(tf.getText().length());
-            }
-        });
-        pane.getChildren().add(tf);
+//        TextField tf = new TextField();
+//        tf.textProperty().addListener(new ChangeListener<String>() {
+//            @Override
+//            public void changed(ObservableValue<? extends String> ob, String o, String n) {
+//                tf.setPrefColumnCount(tf.getText().length());
+//            }
+//        });
+//        pane.getChildren().add(tf);
 
     }
 
@@ -156,6 +146,7 @@ public class userController {
 
         // check mouse event
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+            System.out.println("Mouse pressed");
 
             // set drawing mode
             modeID = ((ToggleButton)(drawMode.getSelectedToggle())).getId();
@@ -220,7 +211,7 @@ public class userController {
             }
 
         }else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-
+            System.out.println("Mouse dragged");
             endX = event.getX();
             endY = event.getY();
 
@@ -259,7 +250,7 @@ public class userController {
             }
 
         } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-
+            System.out.println("Mouse released");
             endX = event.getX();
             endY = event.getY();
 
@@ -324,5 +315,9 @@ public class userController {
                     break;
             }
         }
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

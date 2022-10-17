@@ -1,5 +1,8 @@
 package com.example.distributedsharedwhiteboard.Shape;
 
+import com.example.distributedsharedwhiteboard.Util.JsonElement;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
+
 @JsonSerializable
 public class Circle extends Shape{
 

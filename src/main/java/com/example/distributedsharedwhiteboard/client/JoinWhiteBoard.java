@@ -1,8 +1,11 @@
 package com.example.distributedsharedwhiteboard.client;
 
+import com.example.distributedsharedwhiteboard.Application.ManagerApplication;
+import com.example.distributedsharedwhiteboard.Application.Models.Manager;
+import com.example.distributedsharedwhiteboard.Application.Models.User;
 import com.example.distributedsharedwhiteboard.Application.UserApplication;
-import com.example.distributedsharedwhiteboard.message.JoinRequest;
-import com.example.distributedsharedwhiteboard.util;
+import com.example.distributedsharedwhiteboard.message.*;
+import com.example.distributedsharedwhiteboard.Util.util;
 import javafx.application.Application;
 
 import java.io.*;
@@ -26,6 +29,8 @@ public class JoinWhiteBoard {
     static DataOutputStream output;
     static DataInputStream input;
 
+    static private User user;
+
     public static void main(String[] args) throws UnknownHostException {
 
         // Parse Command Line Arguments
@@ -47,8 +52,8 @@ public class JoinWhiteBoard {
             }
             username = arg3;
         } else {
-            System.out.println("Received Wrong arguments.\n" +
-                    "A default server address and port will be used");
+            System.out.println("Received Wrong arguments.\n");
+            System.exit(1);
         }
 
         // establish connection with Server, and launch Application if success
@@ -59,27 +64,32 @@ public class JoinWhiteBoard {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 
-            // Send JoinWhiteBoard request to Server
-            util.writeMsg(bufferedWriter,new JoinRequest(username));
+            Message msgFromServer = util.SendAndRead(bufferedWriter,bufferedReader,new JoinRequest(username));
 
-
-            // Receive JoinWhiteBoard reply from server.
-
-            /*
-             * On enter the application , Log some information about the configuration settings.
-             */
-            //    String welcomeMsg = " --- Welcome to DS White Board ---";
-            //    String connectionInfo =  "Server: " + Server.getSvrIPAddress() + ":" + Server.getSvrPort();
-            //    String assignedUserId = "Your user ID: " + res.get("userid");
-            // add msg to message history
+            // launch user application
+            if (msgFromServer.getClass().getName() == JoinReply.class.getName()){
+                JoinReply joinReply = (JoinReply)msgFromServer;
+                user = new User(srvAddress,srvPort,username,joinReply.userId);
+                Application.launch(UserApplication.class);
+            } else if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
+                CreateReply createReply = (CreateReply) msgFromServer;
+                user = new Manager(srvAddress,srvPort,username,createReply.userId);
+                Application.launch(ManagerApplication.class);
+            } else {
+                ErrorMsg errorMsg = (ErrorMsg) msgFromServer;
+                System.out.println(errorMsg.msg);
+                System.exit(1);
+            }
 
         } catch (IOException e) {
             System.out.println("Client received IO exception on socket.");
             throw new RuntimeException(e);
         }
-        // launch user application
-        Application.launch(UserApplication.class, args);
+
+
     }
 
-
+    public static User getUser() {
+        return user;
+    }
 }

@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard.message;
+package com.example.distributedsharedwhiteboard.Util;
 
 
 @SuppressWarnings("serial")

@@ -1,5 +1,8 @@
 package com.example.distributedsharedwhiteboard.Shape;
 
+import com.example.distributedsharedwhiteboard.Util.JsonElement;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
+
 import java.util.ArrayList;
 
 @JsonSerializable

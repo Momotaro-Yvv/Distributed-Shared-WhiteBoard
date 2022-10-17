@@ -1,19 +1,18 @@
-package com.example.distributedsharedwhiteboard.server;
-
-import com.example.distributedsharedwhiteboard.Logger;
+package com.example.distributedsharedwhiteboard;
 
 import java.util.HashMap;
 import java.util.Set;
 
 public class UserList {
-    private static String managerName;
-    private static int managerID;
+    private String managerName;
+    private int managerID;
+
+    private Logger logger = new Logger();
 
     // keep record the number of users joined, including deleted ones
-    private static int counter = 0;
+    private int userListSize = 0;
 
-    Logger logger = Server.svrLogger;
-    private static HashMap<Integer,String> users;
+    private HashMap<Integer,String> users;
 
     public UserList() {
         users = new HashMap<Integer,String>();
@@ -22,9 +21,9 @@ public class UserList {
     public int addAUser (String name){
         int userId = 0;
         if (! users.containsValue(name)){
-            counter++;
-            users.put(counter, name);
-            userId = counter;
+            userListSize++;
+            users.put(userListSize, name);
+            userId = userListSize;
         } else {
             logger.logDebug("User name already exist");
         }
@@ -73,9 +72,9 @@ public class UserList {
 
     public int addManager (String name){
         managerName = name;
-        counter ++;
-        users.put(counter, name);
-        return counter;
+        userListSize++;
+        users.put(userListSize, name);
+        return userListSize;
     }
 
     public int getListSize(){
