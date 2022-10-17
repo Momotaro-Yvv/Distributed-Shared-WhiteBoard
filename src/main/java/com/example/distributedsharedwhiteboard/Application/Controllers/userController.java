@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard.Application;
+package com.example.distributedsharedwhiteboard.Application.Controllers;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,6 +15,7 @@ import javafx.scene.text.Text;
 import java.io.File;
 import java.io.FileInputStream;
 
+import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListCell;
@@ -34,8 +35,7 @@ import javafx.event.EventHandler;
 import javafx.scene.input.KeyCode;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-
-// FIXME: after resize the window, need to resize the panel as well
+import javafx.scene.control.Alert;
 
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
@@ -48,11 +48,12 @@ public class userController {
     @FXML
     protected TextField msg;
 
+    // to do: need to change file structure to enable protected access
     @FXML
-    protected ListView<String> MsgHistory;
+    public ListView<String> MsgHistory;
 
     @FXML
-    protected ListView<String> userList;
+    public ListView<String> userList;
 
     @FXML
     protected ColorPicker colorPicker;
@@ -115,14 +116,17 @@ public class userController {
         polygon = new Polygon();
 
         // test drawText
-        TextField tf = new TextField();
-        tf.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> ob, String o, String n) {
-                tf.setPrefColumnCount(tf.getText().length());
-            }
-        });
-        pane.getChildren().add(tf);
+//        TextField tf = new TextField();
+//        tf.textProperty().addListener(new ChangeListener<String>() {
+//            @Override
+//            public void changed(ObservableValue<? extends String> ob, String o, String n) {
+//                tf.setPrefColumnCount(tf.getText().length());
+//            }
+//        });
+//        pane.getChildren().add(tf);
+
+        // test error dialog
+//        showErrorDialog("test only");
 
     }
 
@@ -324,5 +328,15 @@ public class userController {
                     break;
             }
         }
+    }
+
+    // Invoke this message to display a dialog with error message
+    protected void showErrorDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error Dialog");
+        alert.setHeaderText("An error occurred.");
+        alert.setContentText(message);
+
+        alert.showAndWait();
     }
 }

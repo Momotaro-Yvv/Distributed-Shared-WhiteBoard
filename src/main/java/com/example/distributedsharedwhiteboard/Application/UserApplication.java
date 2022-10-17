@@ -12,12 +12,6 @@ import java.util.Objects;
 
 public class UserApplication extends Application {
 
-
-    // shape lists
-//    private ObservableList<Shape> outList = FXCollections.observableArrayList();
-//    private ObservableList<String> inputList = FXCollections.observableArrayList();
-
-
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -30,7 +24,6 @@ public class UserApplication extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
-
     }
 
     public static void main(String[] args) {

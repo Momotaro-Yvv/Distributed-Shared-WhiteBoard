@@ -5,7 +5,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.scene.control.MenuItem;
@@ -13,7 +12,6 @@ import javafx.scene.control.ContextMenu;
 
 import java.io.IOException;
 import java.util.Objects;
-import javafx.util.Callback;
 
 public class ManagerApplication extends Application {
     @Override
