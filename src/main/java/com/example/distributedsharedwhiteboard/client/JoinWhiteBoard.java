@@ -1,8 +1,8 @@
 package com.example.distributedsharedwhiteboard.client;
 
 import com.example.distributedsharedwhiteboard.Application.ManagerApplication;
-import com.example.distributedsharedwhiteboard.Application.Models.Manager;
-import com.example.distributedsharedwhiteboard.Application.Models.User;
+import com.example.distributedsharedwhiteboard.Application.Manager;
+import com.example.distributedsharedwhiteboard.Application.User;
 import com.example.distributedsharedwhiteboard.Application.UserApplication;
 import com.example.distributedsharedwhiteboard.message.*;
 import com.example.distributedsharedwhiteboard.Util.util;

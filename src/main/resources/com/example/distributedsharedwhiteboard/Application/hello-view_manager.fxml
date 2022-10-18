@@ -27,7 +27,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.Controllers.managerController">
+<BorderPane xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.distributedsharedwhiteboard.Application.managerController">
     <right>
         <SplitPane orientation="VERTICAL" prefHeight="560.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <items>
@@ -85,8 +85,10 @@
                 <MenuButton fx:id="fileButton" mnemonicParsing="false" text="File">
                     <items>
                         <MenuItem mnemonicParsing="false" text="New" />
+                        <MenuItem mnemonicParsing="false" text="Open" />
                         <MenuItem mnemonicParsing="false" text="Save" />
                         <MenuItem mnemonicParsing="false" onAction="#handleSaveAs" text="SaveAs" />
+                        <MenuItem mnemonicParsing="false" text="Close" />
                     </items>
                 </MenuButton>
                 <Label text="Color">
