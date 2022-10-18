@@ -9,9 +9,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.Objects;
 
-
 public class ManagerApplication extends Application {
-
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ManagerApplication.class.getResource("hello-view_manager.fxml"));
@@ -21,6 +19,38 @@ public class ManagerApplication extends Application {
         stage.getIcons().add(icon);
         stage.setTitle("WhiteBoard - Manager Window");
         stage.setScene(scene);
+//
+//        // set user cell
+//        managerController mc = fxmlLoader.getController();
+//        mc.userList.setCellFactory(lv -> {
+//
+//            ListCell<String> cell = new ListCell<>();
+//
+//            ContextMenu contextMenu = new ContextMenu();
+//
+//            MenuItem kickOutUser = new MenuItem("kick-out");
+//            kickOutUser.setOnAction(event -> {
+//                String item = cell.getItem();
+//                // code to kick user
+//                System.out.println("kick out " + item);
+//            });
+//            contextMenu.getItems().add(kickOutUser);
+//
+//            cell.textProperty().bind(cell.itemProperty());
+//
+//            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+//                if (isNowEmpty) {
+//                    cell.setContextMenu(null);
+//                } else {
+//                    cell.setContextMenu(contextMenu);
+//                }
+//            });
+//            return cell ;
+//        });
+//
+//        mc.userList.getItems().add("some test");
+//        mc.userList.getItems().add("more test");
+
         stage.show();
     }
 

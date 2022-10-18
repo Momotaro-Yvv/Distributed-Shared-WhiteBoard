@@ -21,15 +21,20 @@ import javafx.stage.Stage;
  * A controller that handle both manager and user operation for the WhiteBoard Application
  */
 public class userController {
+
     @FXML
     protected Stage stage;
 
     @FXML
     protected TextField msg;
+
+    // TODO: need to change file structure to enable protected access
     @FXML
-    protected ListView<String> MsgHistory;
+    public ListView<String> MsgHistory;
+
     @FXML
-    protected ListView<String> userList;
+    public ListView<String> userList;
+
     @FXML
     protected ColorPicker colorPicker;
 
@@ -113,6 +118,9 @@ public class userController {
 //            }
 //        });
 //        pane.getChildren().add(tf);
+
+        // test error dialog
+//        showErrorDialog("test only");
 
     }
 
@@ -315,6 +323,16 @@ public class userController {
                     break;
             }
         }
+    }
+
+    // Invoke this message to display a dialog with error message
+    protected void showErrorDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error Dialog");
+        alert.setHeaderText("An error occurred.");
+        alert.setContentText(message);
+
+        alert.showAndWait();
     }
 
     public void setUser(User user) {
