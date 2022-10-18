@@ -27,6 +27,7 @@ import java.util.Optional;
 
 public class managerController extends userController {
     private Manager user;
+
     @Override
     public void initialize(){
         user = (Manager) CreateWhiteBoard.getUser();
@@ -85,21 +86,10 @@ public class managerController extends userController {
 
         // prepare shapes for canvas
         line = new Line();
-        text = new Text();
         circle = new Circle();
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
-
-        // test drawText
-//        TextField tf = new TextField();
-//        tf.textProperty().addListener(new ChangeListener<String>() {
-//            @Override
-//            public void changed(ObservableValue<? extends String> ob, String o, String n) {
-//                tf.setPrefColumnCount(tf.getText().length());
-//            }
-//        });
-//        pane.getChildren().add(tf);
     }
     @FXML
     protected void handleSaveAs(ActionEvent event) {
@@ -150,5 +140,9 @@ public class managerController extends userController {
         } else {
             // ... user chose CANCEL or closed the dialog
         }
+    }
+
+    public void KickOutUser(String user) {
+        System.out.println("kick out " + user);
     }
 }

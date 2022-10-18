@@ -5,17 +5,15 @@ import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
-import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
+import javafx.fxml.FXML;
+import javafx.stage.Stage;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.canvas.*;
+import javafx.scene.shape.*;
+import javafx.scene.input.*;
+import javafx.scene.paint.Color;
 
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
@@ -52,7 +50,7 @@ public class userController {
     protected Line line;
 
     @FXML
-    protected Text text;
+    protected TextField textfield;
 
     @FXML
     protected Circle circle;
@@ -103,21 +101,22 @@ public class userController {
 
         // prepare shapes for canvas
         line = new Line();
-        text = new Text();
+        textfield = new TextField();
         circle = new Circle();
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
 
         // test drawText
-//        TextField tf = new TextField();
 //        tf.textProperty().addListener(new ChangeListener<String>() {
 //            @Override
 //            public void changed(ObservableValue<? extends String> ob, String o, String n) {
 //                tf.setPrefColumnCount(tf.getText().length());
 //            }
 //        });
-//        pane.getChildren().add(tf);
+        textfield.focusedProperty().addListener((obs, oldVal, newVal) ->
+                System.out.println(newVal ? "Focused" : "Unfocused"));
+        pane.getChildren().add(textfield);
 
         // test error dialog
 //        showErrorDialog("test only");
