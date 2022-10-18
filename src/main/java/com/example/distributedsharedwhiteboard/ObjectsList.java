@@ -1,13 +1,11 @@
 package com.example.distributedsharedwhiteboard;
 
 import com.example.distributedsharedwhiteboard.Shape.Shape;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ObjectsList {
-    private static ArrayList<JSONObject> objects;
+    private ArrayList<String> objects;
 
     public ObjectsList () {
         objects = new ArrayList<>();
@@ -19,5 +17,7 @@ public class ObjectsList {
         objects.remove(shape);
     };
 
-
+    public ArrayList<String> getObjects() {
+        return objects;
+    }
 }

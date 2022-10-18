@@ -1,7 +1,10 @@
 package com.example.distributedsharedwhiteboard.server;
 
-import com.example.distributedsharedwhiteboard.*;
+import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.MsgList;
+import com.example.distributedsharedwhiteboard.ObjectsList;
 import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.UserList;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.Util.util;
 import com.example.distributedsharedwhiteboard.message.*;
@@ -14,6 +17,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
 import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 /**
@@ -87,7 +91,7 @@ public class Server {
 
             svrLogger.logDebug("MESSAGE FROM CLIENT: "+ msgFromClient);
 
-            Boolean success = false;
+            Boolean success;
             if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
                 success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientIp, clientPort);
             } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
@@ -115,8 +119,8 @@ public class Server {
                     handleCommand(bufferedWriter,msg);
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | JsonSerializationException e) {
+            svrLogger.logError("Encounter Json Serialization Exception. Invalid message, please try again.");
         }
     }
 
@@ -192,7 +196,7 @@ public class Server {
             if (!userList.checkAUser(userName)) {
                 int userId = userList.addAUser(userName);
                 svrLogger.logDebug("A new user: ID:  " + userId + " Username " + userName + " has been added");
-                writeMsg(bufferedWriter, new JoinReply(userId));
+                writeMsg(bufferedWriter, new JoinReply(userId, userList.getAllNames(), objectsList.getObjects()));
                 return true;
             } else {
                 writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
@@ -210,13 +214,14 @@ public class Server {
      * Handling other requests from clients
      * @return
      */
-    private static void handleCommand(BufferedWriter bufferedWriter, Message message){
+    private static void handleCommand(BufferedWriter bufferedWriter, Message message) throws JsonSerializationException, IOException {
         String command = message.getClass().getName();
         switch(command) {
             case "DrawRequest":
                 DrawRequest drawRequest = (DrawRequest) message;
-                Shape newShape = drawRequest.shape;
-                objectsList.addAnObject(newShape);
+                String jsonShape = drawRequest.shape;
+                Shape shape = TransferToShape(jsonShape);
+                objectsList.addAnObject(shape);
 //              util.writeMsg(); to all users in userList
                 break;
             case "KickRequest":
