@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard.Application.Models;
+package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.Shape.Shape;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -107,6 +107,8 @@ public class User {
 
     //Methods
 
-    void sendDrawMsg(){};
-    void sendChatMsg(){};
+    protected void sendDrawMsg(){};
+    protected void sendChatMsg(){};
+
+    protected void sendQuitMsg(){};
 }

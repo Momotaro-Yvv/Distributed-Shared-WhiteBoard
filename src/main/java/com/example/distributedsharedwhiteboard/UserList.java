@@ -14,6 +14,7 @@ public class UserList {
 
     private HashMap<Integer,String> users;
 
+    // TODO: remove user id, only use username
     public UserList() {
         users = new HashMap<Integer,String>();
     }

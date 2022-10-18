@@ -1,6 +1,6 @@
-package com.example.distributedsharedwhiteboard.Application.Controllers;
+package com.example.distributedsharedwhiteboard.Application;
 
-import com.example.distributedsharedwhiteboard.Application.Models.User;
+import com.example.distributedsharedwhiteboard.Application.User;
 import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -26,12 +26,12 @@ public class userController {
     @FXML
     protected TextField msg;
 
-    // TODO: need to change file structure to enable protected access
     @FXML
-    public ListView<String> MsgHistory;
+    protected ListView<String> MsgHistory;
+    // TODO: change css to avoid similarities between msgList & userList
 
     @FXML
-    public ListView<String> userList;
+    protected ListView<String> userList;
 
     @FXML
     protected ColorPicker colorPicker;
@@ -86,12 +86,9 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional( user.getObjectList(),pane.getChildren());
+        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
         com.example.distributedsharedwhiteboard.Shape.Circle circle1 = new com.example.distributedsharedwhiteboard.Shape.Circle(1, 1, 1);
         user.addObjectItem(circle1);
-
-        //set the default stage
-        this.stage = stage;
 
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
@@ -106,21 +103,6 @@ public class userController {
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
-
-        // test drawText
-//        tf.textProperty().addListener(new ChangeListener<String>() {
-//            @Override
-//            public void changed(ObservableValue<? extends String> ob, String o, String n) {
-//                tf.setPrefColumnCount(tf.getText().length());
-//            }
-//        });
-        textfield.focusedProperty().addListener((obs, oldVal, newVal) ->
-                System.out.println(newVal ? "Focused" : "Unfocused"));
-        pane.getChildren().add(textfield);
-
-        // test error dialog
-//        showErrorDialog("test only");
-
     }
 
     @FXML
@@ -145,6 +127,7 @@ public class userController {
 
     @FXML
     protected void handleQuit(ActionEvent event) {
+        user.sendQuitMsg();
         Platform.exit();
     }
 
@@ -324,11 +307,25 @@ public class userController {
         }
     }
 
+    // TODO: draw shape from server update
+    protected void drawNewShape(Shape shape) {
+
+    }
+
     // Invoke this message to display a dialog with error message
     protected void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error Dialog");
         alert.setHeaderText("An error occurred.");
+        alert.setContentText(message);
+
+        alert.showAndWait();
+    }
+
+    // Invoke this message to display a dialog with info message
+    protected void showInfoDialog(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Info Dialog");
         alert.setContentText(message);
 
         alert.showAndWait();

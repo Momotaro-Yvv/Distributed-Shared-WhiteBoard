@@ -1,8 +1,8 @@
-package com.example.distributedsharedwhiteboard.Application.Models;
+package com.example.distributedsharedwhiteboard.Application;
 
 import java.net.InetAddress;
 
-public class Manager extends User{
+public class Manager extends User {
     Boolean isManager = true;
 
     //Constructors
@@ -15,8 +15,9 @@ public class Manager extends User{
     //Setters
 
     //Methods
+    void approveJoinRequest(boolean desicion){};
 
-    void sendKickUserMsg(){};
+    void sendKickUserMsg(String username){};
 
     void sendTerminateMsg(){};
 

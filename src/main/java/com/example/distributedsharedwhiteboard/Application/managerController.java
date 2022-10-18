@@ -1,6 +1,5 @@
-package com.example.distributedsharedwhiteboard.Application.Controllers;
+package com.example.distributedsharedwhiteboard.Application;
 
-import com.example.distributedsharedwhiteboard.Application.Models.Manager;
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
 import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
@@ -13,10 +12,10 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.*;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
@@ -26,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class managerController extends userController {
-    private Manager user;
+    private Manager user; // TODO: find the reason that user become null
 
     @Override
     public void initialize(){
@@ -86,14 +85,22 @@ public class managerController extends userController {
 
         // prepare shapes for canvas
         line = new Line();
+        textfield = new TextField();
         circle = new Circle();
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
+
+        textfield.setOnAction(e -> {
+            // add your code to be run here
+            System.out.println(textfield.getText());
+            textfield.clear();
+        });
+        pane.getChildren().add(textfield);
     }
     @FXML
     protected void handleSaveAs(ActionEvent event) {
-
+        // TODO: find a way to access the current stage
         FileChooser savefile = new FileChooser();
 
         savefile.getExtensionFilters().addAll(
@@ -116,6 +123,13 @@ public class managerController extends userController {
                 System.out.println("Error!");
             }
         }
+    }
+
+    @Override
+    protected void handleQuit(ActionEvent event) {
+        user.sendTerminateMsg();
+
+        super.handleQuit(event);
     }
 
     // Invoke this message to display a dialog to notify user about unsaved changes
@@ -142,7 +156,30 @@ public class managerController extends userController {
         }
     }
 
-    public void KickOutUser(String user) {
+    // Invoke this message when a user want to join the whiteboard
+    protected void showJoinRequest(String username) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation Dialog");
+        alert.setContentText("User: " + username + " want to join your whiteboard. Do you agree?");
+
+        ButtonType btYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType btNo = new ButtonType("No", ButtonBar.ButtonData.NO);
+
+        alert.getButtonTypes().setAll(btYes, btNo);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == btYes) {
+            // ... user chose "yes
+            user.approveJoinRequest(true);
+        } else {
+            // ... user chose no
+            user.approveJoinRequest(false);
+        }
+    }
+
+    // Invoke this message when a manager want to kick out a specified user
+    protected void KickOutUser(String username) {
+        user.sendKickUserMsg(username);
         System.out.println("kick out " + user);
     }
 }
