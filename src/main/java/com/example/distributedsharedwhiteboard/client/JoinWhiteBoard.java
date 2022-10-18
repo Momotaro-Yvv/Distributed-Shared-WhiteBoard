@@ -31,7 +31,7 @@ public class JoinWhiteBoard {
 
     static private User user;
 
-    public static void main(String[] args) throws UnknownHostException {
+    public static void main(String[] args) {
 
         // Parse Command Line Arguments
         if (args.length == 3){
