@@ -103,6 +103,17 @@ public class userController {
         rectangle = new Rectangle();
         path = new Path();
         polygon = new Polygon();
+
+        // set listener for textfield
+        textfield.setOnAction(e -> {
+            drawText(textfield.getText());
+        });
+
+        textfield.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if( newVal == false) {
+                drawText(textfield.getText());
+            }
+        });
     }
 
     @FXML
@@ -154,6 +165,20 @@ public class userController {
                     path.getElements().add(new MoveTo(startX, startY));
                     break;
                 case "dm_text":
+                    // if a textbox is already existed
+                    if (pane.getChildren().contains(textfield)) {
+
+                        // if textbox contain some text
+                        if (textfield.getText().length() > 0) {
+                            drawText(textfield.getText());
+                        } else {
+                            pane.getChildren().remove(textfield);
+                        }
+                    }
+                    pane.getChildren().add(textfield);
+                    textfield.setLayoutX(startX);
+                    textfield.setLayoutY(startY);
+                    textfield.requestFocus();
                     break;
                 case "dm_line":
                     // add shape to pane
@@ -309,7 +334,18 @@ public class userController {
 
     // TODO: draw shape from server update
     protected void drawNewShape(Shape shape) {
+        // find shape type
+        System.out.println(shape.getClass());
+    }
 
+    protected void drawText(String text) {
+        gc = canvas.getGraphicsContext2D();
+        gc.setStroke(colorPicker.getValue());
+
+        gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
+
+        textfield.clear();
+        pane.getChildren().remove(textfield);
     }
 
     // Invoke this message to display a dialog with error message
