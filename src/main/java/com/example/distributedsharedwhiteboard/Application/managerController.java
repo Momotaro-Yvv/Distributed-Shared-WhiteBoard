@@ -1,6 +1,7 @@
 package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
+import com.example.distributedsharedwhiteboard.Shape.Text;
 import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -92,11 +93,15 @@ public class managerController extends userController {
         polygon = new Polygon();
 
         textfield.setOnAction(e -> {
-            // add your code to be run here
-            System.out.println(textfield.getText());
-            textfield.clear();
+            drawText(textfield.getText());
         });
-        pane.getChildren().add(textfield);
+
+        textfield.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if( newVal == false) {
+                drawText(textfield.getText());
+            }
+        });
+
     }
     @FXML
     protected void handleSaveAs(ActionEvent event) {
