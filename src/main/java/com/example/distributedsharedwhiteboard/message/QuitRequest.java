@@ -3,16 +3,19 @@ package com.example.distributedsharedwhiteboard.message;
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
+/**
+ * Request from user that is leaving the application
+ */
 @JsonSerializable
-public class QuitMsg extends Message{
+public class QuitRequest extends Message{
 
     @JsonElement
-    public Integer userId;
+    public String username;
 
-    public QuitMsg(){};
+    public QuitRequest(){};
 
-    public QuitMsg(Integer userId){
-        this.userId = userId;
+    public QuitRequest(String username){
+        this.username = username;
     };
 
 }

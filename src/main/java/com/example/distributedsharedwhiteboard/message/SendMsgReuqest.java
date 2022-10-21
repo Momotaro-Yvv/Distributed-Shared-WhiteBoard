@@ -4,16 +4,21 @@ import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 /**
- * Request from manager who wants to initialize a new white board
+ * Request from user to send a chat message to chat box
  */
 @JsonSerializable
-public class CreateRequest extends Message{
+public class SendMsgReuqest extends Message{
+
     @JsonElement
     public String username;
 
-    public CreateRequest() {};
-    public CreateRequest(String username){
-        this.username = username;
-    }
+    @JsonElement
+    public String msg;
 
+    public SendMsgReuqest(){}
+
+    public SendMsgReuqest(String username, String msg){
+        this.username = username;
+        this.msg = msg;
+    }
 }
