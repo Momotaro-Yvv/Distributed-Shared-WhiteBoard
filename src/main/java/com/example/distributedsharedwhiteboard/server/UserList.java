@@ -60,7 +60,7 @@ public class UserList {
      * @param username that is leaving the white board application
      * @return true if successfully delete the user from userList otherwise false
      */
-    public boolean userQuit (Integer username){
+    public boolean userQuit (String username){
         if (userList.contains(username)){
             userList.remove(username);
             return true;
@@ -71,7 +71,7 @@ public class UserList {
     }
 
 
-    public boolean kickOutUser (String  manager, String userName){
+    public boolean kickOutUser (String manager, String userName){
         if (managerName == manager) {
             if (userList.contains(userName)){
                 userList.remove(userName);

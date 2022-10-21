@@ -180,7 +180,7 @@ public class Server {
     /**
      * This function will deal with users' initial Join WB request,
      * If the WB hasn't had the manager then the
-     * {@link handleCreateRequest} will be transparently called,
+     * {@ handleCreateRequest} will be transparently called,
      * otherwise this user will be added to existed userList
      * @return false if failed to parse command, otherwise true and send JoinReply
      */
@@ -222,16 +222,16 @@ public class Server {
 //              util.writeMsg(); to all users in userList
                 break;
             case "KickRequest":
-                KickRequest message2 = (KickRequest) message;
-                String managername = message2.managerName;
-                String username = message2.username;
+                KickRequest kickRequest = (KickRequest) message;
+                String managername = kickRequest.managerName;
+                String username = kickRequest.username;
                 Boolean success = userList.kickOutUser(managername, username);
 //              util.writeMsg(); to all users in userList
                 break;
             case "QuitMsg":
-                QuitMsg message3 = (QuitMsg) message;
-                Integer userId = message3.userId;
-                Boolean success1 = userList.userQuit(userId);
+                QuitRequest message3 = (QuitRequest) message;
+                String userQuitting = message3.username;
+                Boolean success1 = userList.userQuit(userQuitting);
 //              util.writeMsg(); to all users in userList
                 break;
             case "TerminateWB":

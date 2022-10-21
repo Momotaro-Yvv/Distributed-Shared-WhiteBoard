@@ -3,6 +3,9 @@ package com.example.distributedsharedwhiteboard.message;
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
+/**
+ * Request from the Whiteboard manager to kick out a user
+ */
 @JsonSerializable
 public class KickRequest extends Message{
 

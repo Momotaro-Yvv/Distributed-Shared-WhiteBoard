@@ -4,17 +4,17 @@ import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 /**
- * Reply from user to confirm the update has been received
+ * Reply from server that the user now has removed from userList
  */
 @JsonSerializable
-public class UpdateShapeReply extends Message{
+public class QuitReply extends Message {
 
     @JsonElement
     public Boolean success;
 
-    public UpdateShapeReply(){}
+    public QuitReply(){}
 
-    public UpdateShapeReply(Boolean success){
+    public QuitReply(Boolean success){
         this.success = success;
     }
 }

@@ -4,17 +4,17 @@ import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 /**
- * Reply from user to confirm the update has been received
+ * Reply from server that the user has been kicked out as requested
  */
 @JsonSerializable
-public class UpdateShapeReply extends Message{
+public class KickReply extends Message{
 
     @JsonElement
     public Boolean success;
 
-    public UpdateShapeReply(){}
+    public KickReply(){};
 
-    public UpdateShapeReply(Boolean success){
+    public KickReply(Boolean success) {
         this.success = success;
     }
 }

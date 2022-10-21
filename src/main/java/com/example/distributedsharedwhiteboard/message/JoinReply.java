@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Reply from server if a user successfully registered
+ */
 @JsonSerializable
 public class JoinReply extends Message{
 
@@ -17,11 +20,11 @@ public class JoinReply extends Message{
     public List<String> userList;
 
     @JsonElement
-    public ArrayList<String> objectList;
+    public List<String> objectList;
 
     public JoinReply(){};
 
-    public JoinReply(Boolean success, List<String> userList, ArrayList<String> objectList){
+    public JoinReply(Boolean success, List<String> userList, List<String> objectList){
         this.success = success;
         this.userList = userList;
         this.objectList = objectList;

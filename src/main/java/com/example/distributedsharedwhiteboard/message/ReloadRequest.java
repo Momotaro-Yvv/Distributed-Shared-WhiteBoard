@@ -1,4 +1,26 @@
 package com.example.distributedsharedwhiteboard.message;
 
-public class ReloadRequest {
+import com.example.distributedsharedwhiteboard.Util.JsonElement;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
+
+import java.util.List;
+
+/**
+ * Request from manager to reopen a saved whiteboard
+ */
+@JsonSerializable
+public class ReloadRequest extends Message{
+
+    @JsonElement
+    public List<String> shapes;
+
+    @JsonElement
+    public String managerName;
+
+    public ReloadRequest(){}
+
+    public ReloadRequest(List<String> shapes, String managerName){
+        this.shapes = shapes;
+        this.managerName = managerName;
+    }
 }
