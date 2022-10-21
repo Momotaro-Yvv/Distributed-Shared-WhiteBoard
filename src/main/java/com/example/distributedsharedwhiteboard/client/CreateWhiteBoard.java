@@ -73,7 +73,7 @@ public class CreateWhiteBoard {
             // launch user application
             if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
                 CreateReply createReply = (CreateReply) msgFromServer;
-                manager = new Manager(srvAddress,srvPort,username,createReply.userId);
+                manager = new Manager(srvAddress,srvPort,username);
                 Application.launch(ManagerApplication.class);
             } else {
                 ErrorMsg errorMsg = (ErrorMsg) msgFromServer;

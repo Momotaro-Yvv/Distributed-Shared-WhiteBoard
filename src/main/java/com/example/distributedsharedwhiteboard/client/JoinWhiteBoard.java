@@ -69,11 +69,11 @@ public class JoinWhiteBoard {
             // launch user application
             if (msgFromServer.getClass().getName() == JoinReply.class.getName()){
                 JoinReply joinReply = (JoinReply)msgFromServer;
-                user = new User(srvAddress,srvPort,username,joinReply.userId);
+                user = new User(srvAddress,srvPort,username);
                 Application.launch(UserApplication.class);
             } else if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
                 CreateReply createReply = (CreateReply) msgFromServer;
-                user = new Manager(srvAddress,srvPort,username,createReply.userId);
+                user = new Manager(srvAddress,srvPort,username);
                 Application.launch(ManagerApplication.class);
             } else {
                 ErrorMsg errorMsg = (ErrorMsg) msgFromServer;

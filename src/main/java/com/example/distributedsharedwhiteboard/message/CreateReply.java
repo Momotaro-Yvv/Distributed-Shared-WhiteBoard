@@ -7,12 +7,12 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 public class CreateReply extends Message{
 
     @JsonElement
-    public Integer userId;
+    public Boolean success;
 
     public CreateReply(){};
 
-    public CreateReply(Integer userId){
-        this.userId = userId;
+    public CreateReply(Boolean success){
+        this.success = success;
     };
 
 }

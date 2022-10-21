@@ -1,10 +1,7 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Logger;
-import com.example.distributedsharedwhiteboard.MsgList;
-import com.example.distributedsharedwhiteboard.ObjectsList;
 import com.example.distributedsharedwhiteboard.Shape.Shape;
-import com.example.distributedsharedwhiteboard.UserList;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.Util.util;
 import com.example.distributedsharedwhiteboard.message.*;
@@ -165,13 +162,13 @@ public class Server {
     private static boolean handleCreateRequest(BufferedWriter bufferedWriter, CreateRequest msg,String ip, int port)
             throws IOException {
         //save this client as manager, and add to User list, return managerId
-        svrLogger.logDebug("Client"+ ip + port +"want to create a White Board");
+        svrLogger.logDebug("Client want to create a White Board");
         if (userList.getListSize() == 0) {
             String managerName = msg.username;
-            int managerId = userList.addManager(managerName);
+            Boolean success = userList.setManager(managerName);
             objectsList = new ObjectsList();
             msgList = new MsgList();
-            writeMsg(bufferedWriter,new CreateReply(managerId));
+            writeMsg(bufferedWriter,new CreateReply(success));
             return true;
         } else {
             String errorMsg = "This White Board already have a manager. Please try other server port";
@@ -194,9 +191,9 @@ public class Server {
 
         if (userList.getListSize() > 0) {
             if (!userList.checkAUser(userName)) {
-                int userId = userList.addAUser(userName);
-                svrLogger.logDebug("A new user: ID:  " + userId + " Username " + userName + " has been added");
-                writeMsg(bufferedWriter, new JoinReply(userId, userList.getAllNames(), objectsList.getObjects()));
+                Boolean success = userList.addAUser(userName);
+                svrLogger.logDebug("A new user:"+ userName + " has been added");
+                writeMsg(bufferedWriter, new JoinReply(success, userList.getAllNames(), objectsList.getObjects()));
                 return true;
             } else {
                 writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
@@ -226,15 +223,15 @@ public class Server {
                 break;
             case "KickRequest":
                 KickRequest message2 = (KickRequest) message;
-                int managerId = message2.managerId;
-                int userid = message2.userId;
-                userList.deleteAUser(managerId, userid);
+                String managername = message2.managerName;
+                String username = message2.username;
+                Boolean success = userList.kickOutUser(managername, username);
 //              util.writeMsg(); to all users in userList
                 break;
             case "QuitMsg":
                 QuitMsg message3 = (QuitMsg) message;
                 Integer userId = message3.userId;
-                userList.userQuit(userId);
+                Boolean success1 = userList.userQuit(userId);
 //              util.writeMsg(); to all users in userList
                 break;
             case "TerminateWB":

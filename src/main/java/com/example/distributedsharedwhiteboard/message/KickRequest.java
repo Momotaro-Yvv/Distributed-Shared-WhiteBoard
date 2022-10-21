@@ -7,14 +7,14 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 public class KickRequest extends Message{
 
     @JsonElement
-    public Integer managerId;
+    public String managerName;
     @JsonElement
-    public Integer userId;
+    public String username;
     public KickRequest(){};
 
-    public KickRequest(Integer managerId, Integer userId){
-        this.managerId = managerId;
-        this.userId = userId;
+    public KickRequest(String managerName, String username){
+        this.managerName = managerName;
+        this.username = username;
     };
 
 }

@@ -6,8 +6,8 @@ public class Manager extends User {
     Boolean isManager = true;
 
     //Constructors
-    public Manager (InetAddress srvAddress, int srvPort, String username, int id){
-        super(srvAddress,srvPort,username,id);
+    public Manager (InetAddress srvAddress, int srvPort, String username){
+        super(srvAddress,srvPort,username);
     };
 
     //Getters

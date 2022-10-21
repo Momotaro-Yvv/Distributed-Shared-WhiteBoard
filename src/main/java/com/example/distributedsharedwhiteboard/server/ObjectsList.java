@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard;
+package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Shape.Shape;
 

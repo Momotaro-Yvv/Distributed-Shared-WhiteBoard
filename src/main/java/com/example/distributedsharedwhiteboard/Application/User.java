@@ -33,11 +33,10 @@ public class User {
 
 
     //Constructors
-    public User(InetAddress srvAddress, int srvPort, String username, int id){
+    public User(InetAddress srvAddress, int srvPort, String username){
 //        this.srvAddress = new SimpleStringProperty(srvAddress);
         this.srvPort = new SimpleIntegerProperty(srvPort);
         this.userName = new SimpleStringProperty(username) ;
-        this.userId = new SimpleIntegerProperty(id);
         this.objectList = FXCollections.observableArrayList();
         this.msgList = FXCollections.observableArrayList();
         this.userList = FXCollections.observableArrayList();
