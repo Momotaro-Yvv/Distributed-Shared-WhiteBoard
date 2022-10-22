@@ -3,10 +3,8 @@ package com.example.distributedsharedwhiteboard.client;
 import com.example.distributedsharedwhiteboard.Application.ManagerApplication;
 import com.example.distributedsharedwhiteboard.Application.Manager;
 import com.example.distributedsharedwhiteboard.Application.User;
-import com.example.distributedsharedwhiteboard.message.CreateReply;
-import com.example.distributedsharedwhiteboard.message.CreateRequest;
-import com.example.distributedsharedwhiteboard.message.ErrorMsg;
-import com.example.distributedsharedwhiteboard.message.Message;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
+import com.example.distributedsharedwhiteboard.message.*;
 import com.example.distributedsharedwhiteboard.Util.util;
 import javafx.application.Application;
 
@@ -16,9 +14,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 
+import static com.example.distributedsharedwhiteboard.Util.util.readMsg;
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
+
 /**
  * The main class for the White Board manager.
- * Handles <Server Address> <Port Number> arguments
+ * Handles <Server Address> <Port Number> <username> arguments
  * and starts up the White Board Apllication for the manager.
  * The GUI provide interface for the manager to draw shapes,
  * to kick out users, and terminates the application.
@@ -28,11 +29,9 @@ public class CreateWhiteBoard {
     static private InetAddress srvAddress;
     static private int srvPort;
     static private String username;
-
+    static Manager manager;
     static DataOutputStream output;
     static DataInputStream input;
-
-    static private User manager;
 
     public static void main(String[] args) throws UnknownHostException {
 
@@ -67,31 +66,39 @@ public class CreateWhiteBoard {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 
-            // Send create request to Server, and get reply
-            Message msgFromServer = util.SendAndRead(bufferedWriter,bufferedReader, new CreateRequest(username));
+            // Send JoinWhiteBoard request to Server
+            writeMsg(bufferedWriter, new CreateRequest(username));
+
+            // Receive JoinWhiteBoard reply from server.
+            Message msgFromServer;
+            try {
+                msgFromServer = readMsg(bufferedReader);
+                System.out.println("received: "+ msgFromServer.toString());
+            } catch (JsonSerializationException e1) {
+                writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+                return;
+            }
 
             // launch user application
             if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
                 CreateReply createReply = (CreateReply) msgFromServer;
-                manager = new Manager(srvAddress,srvPort,username);
-                Application.launch(ManagerApplication.class);
+                if (createReply.success){
+                    manager = new Manager(username);
+                    Application.launch(ManagerApplication.class);
+                }
             } else {
                 ErrorMsg errorMsg = (ErrorMsg) msgFromServer;
                 System.out.println(errorMsg.msg);
                 System.exit(1);
             }
 
-
         } catch (IOException e) {
             System.out.println("Client received IO exception on socket.");
             System.exit(1);
         }
-
-
     }
 
-    public static User getUser() {
+    public static Manager getManager() {
         return manager;
     }
-
 }

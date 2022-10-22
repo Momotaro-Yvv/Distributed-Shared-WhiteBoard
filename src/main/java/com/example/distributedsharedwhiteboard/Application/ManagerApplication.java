@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class ManagerApplication extends Application {
+
+    static private Manager manager;
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ManagerApplication.class.getResource("hello-view_manager.fxml"));
@@ -34,5 +36,14 @@ public class ManagerApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void setManager(Manager manager) {
+        System.out.println("New Manager set up.");
+        ManagerApplication.manager = manager;
+    }
+
+    public static Manager getManager() {
+        return manager;
     }
 }

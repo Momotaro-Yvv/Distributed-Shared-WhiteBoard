@@ -1,29 +1,23 @@
 package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
-import javafx.beans.property.SimpleIntegerProperty;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Polygon;
-import javafx.scene.text.Text;
 
-import java.net.InetAddress;
+import java.io.IOException;
+import java.util.List;
+
+import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
 
 public class User {
     Boolean isManager = false;
     private SimpleStringProperty userName;
-    private SimpleIntegerProperty userId;
-    private SimpleStringProperty srvAddress;
-    private SimpleIntegerProperty srvPort;
 
 //    bidirectionalList
 
-    private ObservableList<Node> objectList;
+    private ObservableList<ShapeDrawing> objectList;
 
 
     private ObservableList<String> msgList;
@@ -33,9 +27,7 @@ public class User {
 
 
     //Constructors
-    public User(InetAddress srvAddress, int srvPort, String username){
-//        this.srvAddress = new SimpleStringProperty(srvAddress);
-        this.srvPort = new SimpleIntegerProperty(srvPort);
+    public User(String username){
         this.userName = new SimpleStringProperty(username) ;
         this.objectList = FXCollections.observableArrayList();
         this.msgList = FXCollections.observableArrayList();
@@ -45,7 +37,7 @@ public class User {
 
     //Getters
 
-    public ObservableList<Node> getObjectList() {
+    public ObservableList<ShapeDrawing> getObjectList() {
         return objectList;
     }
 
@@ -102,6 +94,26 @@ public class User {
 
     public void addUserItem(String item) {
         this.userList.add(item);
+    }
+
+    //Setters
+
+    public void setObjectList(String[] objectList) throws JsonSerializationException, IOException {
+        for (String string: objectList){
+            this.objectList.add(TransferToShape(string));
+        }
+    }
+
+    public void setMsgList(String[] msgList) {
+        for (String string: msgList){
+            this.msgList.add(string);
+        }
+    }
+
+    public void setUserList(String[] userList) {
+        for (String string: userList){
+        this.userList.add(string);
+        }
     }
 
     //Methods

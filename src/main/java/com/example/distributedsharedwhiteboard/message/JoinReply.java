@@ -17,17 +17,24 @@ public class JoinReply extends Message{
     public Boolean success;
 
     @JsonElement
-    public List<String> userList;
+    public String[] userList;
 
     @JsonElement
-    public List<String> objectList;
+    public String[] objectList;
 
     public JoinReply(){};
 
     public JoinReply(Boolean success, List<String> userList, List<String> objectList){
         this.success = success;
-        this.userList = userList;
-        this.objectList = objectList;
+        this.userList = new String[userList.size()];
+        this.objectList = new String[objectList.size()];
+
+        for(int i=0;i<userList.size();i++) {
+            this.userList[i]=userList.get(i);
+        }
+        for(int i=0;i<objectList.size();i++) {
+            this.objectList[i]=objectList.get(i);
+        }
     };
 
 }

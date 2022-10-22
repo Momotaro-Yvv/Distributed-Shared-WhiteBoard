@@ -76,7 +76,7 @@ public class managerController extends userController {
 
         setUp();
 
-        manager = (Manager) CreateWhiteBoard.getUser();
+        manager = CreateWhiteBoard.getManager();
 
         // bind variables
         Bindings.bindContentBidirectional(manager.getMsgList(), msgHistory.getItems());

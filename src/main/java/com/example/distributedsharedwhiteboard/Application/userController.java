@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 
 import javafx.fxml.FXML;
@@ -110,7 +111,7 @@ public class userController {
 
                     // if anything was added to list
                     if (c.wasAdded()) {
-                        for (Object o : c.getAddedSubList()) {
+                        for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
                             ShapeDrawing shape = (ShapeDrawing) o;
                         }
