@@ -1,11 +1,18 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.message.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 public class UserList {
     private String managerName;
@@ -17,8 +24,11 @@ public class UserList {
 
     private List<String> userList;
 
+    private HashMap<String, Socket> userSockets;
+
     protected UserList() {
         userList = new ArrayList<>();
+        userSockets = new HashMap<>();
     }
 
     /**
@@ -26,10 +36,11 @@ public class UserList {
      * @param name the username provided by client
      * @return true if no repeated name in the list otherwise false
      */
-    protected Boolean addAUser (String name){
+    protected Boolean addAUser (String name, Socket client){
         if (! userList.contains(name)){
             userList.add(name);
-            logger.logDebug("New User Added:"+ name);
+            userSockets.put(name, client);
+            logger.logDebug("A new User Added:"+ name);
             return true;
         } else {
             logger.logDebug("User name already exist");
@@ -39,6 +50,7 @@ public class UserList {
 
     public void clearUserList(){
         userList.clear();
+        userSockets.clear();
     }
 
     /**
@@ -46,6 +58,13 @@ public class UserList {
      */
     protected List<String> getAllNames() {
         return userList;
+    }
+
+    /**
+     * @return all sockets of current users
+     */
+    protected Collection<Socket> getAllSockets() {
+        return userSockets.values();
     }
 
     /**
@@ -67,6 +86,13 @@ public class UserList {
     public boolean userQuit (String username){
         if (userList.contains(username)){
             userList.remove(username);
+            try {
+                userSockets.get(username).close();
+            } catch (IOException e) {
+                logger.logWarn("Something wrong happened when closing client socket for user" + username);
+                throw new RuntimeException(e);
+            }
+            userSockets.remove(username);
             return true;
         } else{
             logger.logDebug("User was not in UserList...");
@@ -79,6 +105,7 @@ public class UserList {
         if (managerName == manager) {
             if (userList.contains(userName)){
                 userList.remove(userName);
+                userSockets.remove(userName);
                 return true;
             } else{
                 logger.logWarn("Delete failed: this username not exist.");
@@ -90,20 +117,73 @@ public class UserList {
         }
     }
 
-    public Boolean setManager (String name){
+    public Boolean setManager (String name, Socket socket){
         if (userList.size() == 0) {
             managerName = name;
             userList.add(name);
+            userSockets.put(name, socket);
             return true;
         } else {
             logger.logDebug("This White board already has a manager.");
             return false;
         }
-
     }
+
+    public Socket getManagerSocket (){
+        return userSockets.get(managerName);
+    }
+
 
     public int getListSize(){
         return userList.size();
+    }
+
+    /**
+     * Send a UpdateUserlistRequest to all other users about the update except sender
+     * @param newUser who just joined in the white board
+     * @throws IOException
+     */
+    private void sendNewUserToAllUsers(String newUser) throws IOException {
+        for (Socket other : userSockets.values()) {
+            if (other == userSockets.get(newUser)) {
+                continue;//ignore the sender client.
+            }
+            DataOutputStream out = new DataOutputStream(other.getOutputStream());
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+            writeMsg(bw, new UpdateUserlistRequest(newUser));
+        }
+    }
+
+    /**
+     * Send a UpdateShapeRequest to all other users about the update except sender
+     * @param fromWhom is user who drawn new shapes on the white board
+     * @throws IOException
+     */
+    private void sendNewShapeToAllUsers(String fromWhom, ShapeDrawing newShape) throws IOException {
+        for (Socket other : userSockets.values()) {
+            if (other == userSockets.get(fromWhom)) {
+                continue;//ignore the sender client.
+            }
+            DataOutputStream out = new DataOutputStream(other.getOutputStream());
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+            writeMsg(bw, new UpdateShapeRequest(newShape));
+        }
+    }
+
+    /**
+     * Send a UpdateMsgRequest to all other users about the update except sender
+     * @param fromWhom is user who sent new messgae onto chat box
+     * @throws IOException
+     */
+    private void sendChatToAllUsers(String fromWhom, String msg) throws IOException {
+        for (Socket other : userSockets.values()) {
+            if (other == userSockets.get(fromWhom)) {
+                continue;//ignore the sender client.
+            }
+            DataOutputStream out = new DataOutputStream(other.getOutputStream());
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+            writeMsg(bw, new UpdateMsgRequest(msg));
+        }
     }
 
 }

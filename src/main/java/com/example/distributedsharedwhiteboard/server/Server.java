@@ -91,9 +91,9 @@ public class Server {
 
                 Boolean success;
                 if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
-                    success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientIp, clientPort);
+                    success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientSocket);
                 } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
-                    success = handleJoinRequest(bufferedWriter, (JoinRequest) msgFromClient, clientIp, clientPort);
+                    success = handleJoinRequest(bufferedWriter, bufferedReader, (JoinRequest) msgFromClient, clientSocket);
                 } else {
                     writeMsg(bufferedWriter,new ErrorMsg("Expecting JoinRequest or CreateRequest"));
                     return;
@@ -164,12 +164,12 @@ public class Server {
      * Otherwise a new objects list and message History list will be initialised
      * @return true and send back CreateReply if the request successful start the WB, otherwise false
      */
-    private static boolean handleCreateRequest(BufferedWriter bufferedWriter, CreateRequest msg,String ip, int port)
+    private static boolean handleCreateRequest(BufferedWriter bufferedWriter, CreateRequest msg, Socket clientSocket)
             throws IOException {
         //save this client as manager, and add to User list, return managerId
         svrLogger.logDebug("Client want to create a White Board...");
         String managerName = msg.username;
-        Boolean success = userList.setManager(managerName);
+        Boolean success = userList.setManager(managerName, clientSocket);
         if (success) {
             objectsList = new ObjectsList();
             msgList = new MsgList();
@@ -188,24 +188,47 @@ public class Server {
      * otherwise this user will be added to existed userList
      * @return false if failed to parse command, otherwise true and send JoinReply
      */
-    private static boolean handleJoinRequest(BufferedWriter bufferedWriter,JoinRequest msg,String ip, int port)
+    private static boolean handleJoinRequest(BufferedWriter bufferedWriter,BufferedReader bufferedReader, JoinRequest msg,Socket clientSocket)
             throws IOException {
         svrLogger.logDebug("Client want to join a White Board");
         String userName = msg.username;
 
-        if (userList.getListSize() > 0) {
-            Boolean success = userList.addAUser(userName);
-            if (success) {
-                svrLogger.logDebug("A new user:"+ userName + " has been added");
-                writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
-                return true;
-            } else {
-                writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
+        //Send ApproveRequest to Manager asking for approvement
+        DataOutputStream out = new DataOutputStream(userList.getManagerSocket().getOutputStream());
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+        writeMsg(bw, new ApproveRequest(userName));
+
+        // get a message
+        Message msgFromManager;
+        try {
+            msgFromManager = util.readMsg(bufferedReader);
+        } catch (JsonSerializationException e1) {
+            writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+            return false;
+        }
+
+        Boolean approve = false;
+        if (msgFromManager.getClass().getName() == ApproveReply.class.getName()){
+            ApproveReply approveReply = (ApproveReply)msgFromManager;
+            approve = approveReply.approve;
+        }
+        if (approve){
+            if (userList.getListSize() > 0) {
+                Boolean success = userList.addAUser(userName,clientSocket);
+                if (success) {
+                    svrLogger.logDebug("A new user:"+ userName + " has been added");
+                    writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
+                    return true;
+                } else {
+                    writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
+                    return false;
+                }
+            } else{
+                String error = "The White board does not owned by a manager yet, You can create a White board instead";
+                writeMsg(bufferedWriter, new ErrorMsg(error));
                 return false;
             }
-        } else{
-            String error = "The White board does not owned by a manager yet, You can create a White board";
-            writeMsg(bufferedWriter, new ErrorMsg(error));
+        } else {
             return false;
         }
     }

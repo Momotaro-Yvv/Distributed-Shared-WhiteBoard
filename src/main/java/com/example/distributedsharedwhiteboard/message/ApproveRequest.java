@@ -8,7 +8,7 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
  */
 
 @JsonSerializable
-public class ApproveRequest {
+public class ApproveRequest extends Message{
 
     @JsonElement
     public String username;
