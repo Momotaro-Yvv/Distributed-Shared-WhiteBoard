@@ -3,11 +3,10 @@ package com.example.distributedsharedwhiteboard.Application;
 import java.net.InetAddress;
 
 public class Manager extends User {
-    Boolean isManager = true;
 
     //Constructors
-    public Manager (InetAddress srvAddress, int srvPort, String username){
-        super(srvAddress,srvPort,username);
+    public Manager (String username){
+        super(username);
     };
 
     //Getters
@@ -15,7 +14,7 @@ public class Manager extends User {
     //Setters
 
     //Methods
-    void approveJoinRequest(boolean desicion){};
+    void approveJoinRequest(boolean decision){};
 
     void sendKickUserMsg(String username){};
 

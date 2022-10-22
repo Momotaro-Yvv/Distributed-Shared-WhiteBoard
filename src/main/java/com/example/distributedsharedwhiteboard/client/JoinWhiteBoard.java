@@ -4,15 +4,21 @@ import com.example.distributedsharedwhiteboard.Application.ManagerApplication;
 import com.example.distributedsharedwhiteboard.Application.Manager;
 import com.example.distributedsharedwhiteboard.Application.User;
 import com.example.distributedsharedwhiteboard.Application.UserApplication;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.*;
 import com.example.distributedsharedwhiteboard.Util.util;
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static com.example.distributedsharedwhiteboard.Util.util.*;
 
 /**
  * The main class for the White Board user.
@@ -26,10 +32,10 @@ public class JoinWhiteBoard {
     static private int srvPort;
     static private String username;
 
+    static private User user;
+
     static DataOutputStream output;
     static DataInputStream input;
-
-    static private User user;
 
     public static void main(String[] args) {
 
@@ -64,17 +70,29 @@ public class JoinWhiteBoard {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 
-            Message msgFromServer = util.SendAndRead(bufferedWriter,bufferedReader,new JoinRequest(username));
+            // Send JoinWhiteBoard request to Server
+            writeMsg(bufferedWriter,new JoinRequest(username));
+
+            // Receive JoinWhiteBoard reply from server.
+            Message msgFromServer;
+            try {
+                msgFromServer = readMsg(bufferedReader);
+            } catch (JsonSerializationException e1) {
+                writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+                return;
+            }
 
             // launch user application
             if (msgFromServer.getClass().getName() == JoinReply.class.getName()){
                 JoinReply joinReply = (JoinReply)msgFromServer;
-                user = new User(srvAddress,srvPort,username);
-                Application.launch(UserApplication.class);
-            } else if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
-                CreateReply createReply = (CreateReply) msgFromServer;
-                user = new Manager(srvAddress,srvPort,username);
-                Application.launch(ManagerApplication.class);
+                if (joinReply.success){
+                    List<String> userList = joinReply.userList;
+                    List<String> objectList =joinReply.objectList;
+                    user = new User(username);
+                    user.setUserList((ObservableList<String>) userList);
+                    user.setObjectList((ObservableList<ShapeDrawing>) TransferFromJsonList(objectList));
+                    Application.launch(UserApplication.class);
+                }
             } else {
                 ErrorMsg errorMsg = (ErrorMsg) msgFromServer;
                 System.out.println(errorMsg.msg);
@@ -84,9 +102,10 @@ public class JoinWhiteBoard {
         } catch (IOException e) {
             System.out.println("Client received IO exception on socket.");
             throw new RuntimeException(e);
+        } catch (JsonSerializationException e) {
+            System.out.println("Something wrong with adding shapes into user objectList");
+            throw new RuntimeException(e);
         }
-
-
     }
 
     public static User getUser() {
