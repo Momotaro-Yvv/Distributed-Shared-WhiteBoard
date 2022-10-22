@@ -13,6 +13,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
 import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
@@ -30,6 +32,8 @@ public class Server {
     private static ObjectsList objectsList;
     private static MsgList msgList;
 
+    private static LinkedBlockingDeque<Message> incomingUpdates;
+
     private static Logger svrLogger = new Logger();
     private final static String welcomeMsg = " --- Welcome to Distributed Share White Board Server ---";
 
@@ -42,6 +46,9 @@ public class Server {
 
             //initialize an empty user list for tracking clients
             userList = new UserList();
+
+            // initialize an empty queue to put update message
+            incomingUpdates = new LinkedBlockingDeque<>();
 
             ServerSocketFactory factory = ServerSocketFactory.getDefault();
             try (ServerSocket server = factory.createServerSocket(svrPort)) {
@@ -57,6 +64,9 @@ public class Server {
                     // Start a new thread for each connection
                     Thread newThread = new Thread(() -> serveClient(client));
                     newThread.start();
+
+                    UpdateThread updateThread = new UpdateThread(incomingUpdates, userList);
+                    updateThread.start();
                 }
 
             } catch (IOException e) {
@@ -114,7 +124,7 @@ public class Server {
                         };
 
                         // process the request message
-                        handleCommand(bufferedWriter,msg);
+                        handleCommand(bufferedWriter,bufferedReader, msg);
                     }
                 }
             } catch (IOException | JsonSerializationException e) {
@@ -238,7 +248,7 @@ public class Server {
      * Handling other requests from clients
      * @return
      */
-    private static void handleCommand(BufferedWriter bufferedWriter, Message message) throws JsonSerializationException, IOException {
+    private static void handleCommand(BufferedWriter bufferedWriter,BufferedReader bufferedReader, Message message) throws JsonSerializationException, IOException {
         String command = message.getClass().getName();
         switch(command) {
             case "com.example.distributedsharedwhiteboard.message.DrawRequest":
@@ -248,7 +258,9 @@ public class Server {
 
                 ShapeDrawing shapeDrawing = TransferToShape(jsonShape);
                 objectsList.addAnObject(shapeDrawing);
-                util.writeMsg(bufferedWriter, new DrawReply());
+                util.writeMsg(bufferedWriter, new DrawReply(true));
+
+                incomingUpdates.add(new UpdateShapeRequest(shapeDrawing, drawBy));
                 break;
             case "com.example.distributedsharedwhiteboard.message.KickRequest":
                 KickRequest kickRequest = (KickRequest) message;
@@ -257,6 +269,15 @@ public class Server {
                 Boolean success = userList.kickOutUser(managerName, username);
                 if (success){
                     util.writeMsg(bufferedWriter, new KickReply(true));
+
+                    //Send ApproveRequest to Manager asking for approvement
+                    DataOutputStream out = new DataOutputStream(userList.getUserSocketByName(username).getOutputStream());
+                    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+                    writeMsg(bw, new Goodbye("You have been kicked out by the manager."));
+
+                    incomingUpdates.add(new UpdateDeleteUserRequest(username));
+                } else {
+                    util.writeMsg(bufferedWriter, new ErrorMsg("Can't not kick this user out"));
                 }
                 break;
             case "com.example.distributedsharedwhiteboard.message.QuitMsg":
@@ -265,16 +286,40 @@ public class Server {
                 Boolean success1 = userList.userQuit(userQuitting);
                 if (success1){
                     util.writeMsg(bufferedWriter, new QuitReply(true));
+                    incomingUpdates.add(new UpdateDeleteUserRequest(userQuitting));
+                } else {
+                    util.writeMsg(bufferedWriter,new ErrorMsg("Something went wrong when the user tries to leave"));
                 }
                 break;
             case "com.example.distributedsharedwhiteboard.message.TerminateWB":
                 TerminateWB terminate = (TerminateWB) message;
-                userList.clearUserList();
-                objectsList.clearObjectList();
-                msgList.clearMsgList();
-                util.writeMsg(bufferedWriter,new Goodbye());
-                break;
+                if (terminate.managerName == userList.getManagerName()){
+                    userList.clearUserList();
+                    objectsList.clearObjectList();
+                    msgList.clearMsgList();
+                    util.writeMsg(bufferedWriter,new Goodbye());
+                } else {
+                    util.writeMsg(bufferedWriter, new ErrorMsg("You are not authorised to terminate white board"));
+                }
 
+                incomingUpdates.add(new Goodbye("The manager terminate the white board"));
+                break;
+            case "com.example.distributedsharedwhiteboard.message.ReloadRequest":
+                ReloadRequest reloadRequest = (ReloadRequest) message;
+                String managerName1 = reloadRequest.managerName;
+                List<String>  reloadShapes= reloadRequest.shapes;
+                if (managerName1 == userList.getManagerName()){
+                    for (String jsonObject: reloadShapes){
+                        ShapeDrawing shapeDrawing1 = TransferToShape(jsonObject);
+                        objectsList.addAnObject(shapeDrawing1);
+                        util.writeMsg(bufferedWriter,new UpdateShapeRequest(shapeDrawing1, managerName1));
+                    }
+                    util.writeMsg(bufferedWriter,new ReloadReply(true));
+                }else {
+                    util.writeMsg(bufferedWriter, new ErrorMsg("Something went wrong reloading the file"));
+                }
+
+                break;
             default:
                 writeMsg(bufferedWriter,new ErrorMsg("Expecting a request message"));
 

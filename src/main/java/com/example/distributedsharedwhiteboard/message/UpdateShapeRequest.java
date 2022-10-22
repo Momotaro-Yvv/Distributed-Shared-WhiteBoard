@@ -14,11 +14,14 @@ public class UpdateShapeRequest extends Message{
 
     @JsonElement
     public String shape;
+    @JsonElement
+    public String byWhom;
 
     public UpdateShapeRequest(){}
 
-    public UpdateShapeRequest(ShapeDrawing shapeDrawing){
+    public UpdateShapeRequest(ShapeDrawing shapeDrawing, String byWhom){
         this.shape = TransferFromShape(shapeDrawing);
+        this.byWhom = byWhom;
     }
 
 }

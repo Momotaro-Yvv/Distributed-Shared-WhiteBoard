@@ -61,13 +61,6 @@ public class UserList {
     }
 
     /**
-     * @return all sockets of current users
-     */
-    protected Collection<Socket> getAllSockets() {
-        return userSockets.values();
-    }
-
-    /**
      * Check is a user is currently in the userList
      * @param username
      * @return true if the user in the list otherwise false
@@ -129,61 +122,28 @@ public class UserList {
         }
     }
 
+    //Getters
+
+    /**
+     * @return all sockets of current users
+     */
+    protected Collection<Socket> getAllSockets() {
+        return userSockets.values();
+    }
+
     public Socket getManagerSocket (){
         return userSockets.get(managerName);
     }
 
+    public Socket getUserSocketByName (String userName){
+        return userSockets.get(userName);
+    }
 
     public int getListSize(){
         return userList.size();
     }
 
-    /**
-     * Send a UpdateUserlistRequest to all other users about the update except sender
-     * @param newUser who just joined in the white board
-     * @throws IOException
-     */
-    private void sendNewUserToAllUsers(String newUser) throws IOException {
-        for (Socket other : userSockets.values()) {
-            if (other == userSockets.get(newUser)) {
-                continue;//ignore the sender client.
-            }
-            DataOutputStream out = new DataOutputStream(other.getOutputStream());
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-            writeMsg(bw, new UpdateUserlistRequest(newUser));
-        }
+    public String getManagerName() {
+        return managerName;
     }
-
-    /**
-     * Send a UpdateShapeRequest to all other users about the update except sender
-     * @param fromWhom is user who drawn new shapes on the white board
-     * @throws IOException
-     */
-    private void sendNewShapeToAllUsers(String fromWhom, ShapeDrawing newShape) throws IOException {
-        for (Socket other : userSockets.values()) {
-            if (other == userSockets.get(fromWhom)) {
-                continue;//ignore the sender client.
-            }
-            DataOutputStream out = new DataOutputStream(other.getOutputStream());
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-            writeMsg(bw, new UpdateShapeRequest(newShape));
-        }
-    }
-
-    /**
-     * Send a UpdateMsgRequest to all other users about the update except sender
-     * @param fromWhom is user who sent new messgae onto chat box
-     * @throws IOException
-     */
-    private void sendChatToAllUsers(String fromWhom, String msg) throws IOException {
-        for (Socket other : userSockets.values()) {
-            if (other == userSockets.get(fromWhom)) {
-                continue;//ignore the sender client.
-            }
-            DataOutputStream out = new DataOutputStream(other.getOutputStream());
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-            writeMsg(bw, new UpdateMsgRequest(msg));
-        }
-    }
-
 }

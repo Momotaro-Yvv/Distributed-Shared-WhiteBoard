@@ -4,7 +4,7 @@ import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 /**
- * Request from server to update change of userlist
+ * Request from server to update an addition in the user list
  */
 @JsonSerializable
 public class UpdateUserlistRequest extends Message{
