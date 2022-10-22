@@ -1,14 +1,16 @@
 package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
+import com.example.distributedsharedwhiteboard.Util.JsonElement;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.MessageFactory;
+
+import javafx.scene.paint.Color;
 
 /**
  *  Fundamental plane figures
  */
 public class ShapeDrawing {
-
-    // parameters for color
 
     public ShapeDrawing() {
     }

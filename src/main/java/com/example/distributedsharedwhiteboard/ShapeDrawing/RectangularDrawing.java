@@ -3,16 +3,26 @@ package com.example.distributedsharedwhiteboard.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
+import javafx.scene.paint.Color;
+
 @JsonSerializable
 public class RectangularDrawing extends ShapeDrawing {
 
     @JsonElement
-    public double x, y, width, height;
+    public Double x, y, width, height;
+
+    @JsonElement
+    public Double red, green, blue, opacity;
 
     public RectangularDrawing() {
     }
 
-    public RectangularDrawing(double x, double y, double width, double height) {
+    public RectangularDrawing(Double x, Double y, Double width, Double height, Color color) {
+        this.red = color.getRed();
+        this.green = color.getGreen();
+        this.blue = color.getBlue();
+        this.opacity = color.getOpacity();
+
         this.x = x;
         this.y = y;
         this.width = width;

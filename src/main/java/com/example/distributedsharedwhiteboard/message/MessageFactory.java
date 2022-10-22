@@ -4,12 +4,14 @@ import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationInit;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.*;
 import java.util.Objects;
+import java.math.BigDecimal;
 
 /**
  * A factory class to serialize and deserialize JSONSerializable
@@ -104,7 +106,10 @@ public class MessageFactory {
                         Class<?> jsonFieldType = jsonFieldVal.getClass();
                         if(fieldType==Long.class && jsonFieldType==Integer.class) {
                             field.set(obj, jobj.getLong(fieldName));
-                        } else if(fieldType.isAssignableFrom(jsonFieldType)) {
+                        } else if (fieldType==Double.class) {
+                            field.set(obj, jobj.getDouble(fieldName));
+                        }
+                        else if(fieldType.isAssignableFrom(jsonFieldType)) {
                             field.set(obj, jsonFieldVal);
                         } else if(jsonFieldType==JSONObject.class){
                             field.set(obj, fromJsonObj((JSONObject)jsonFieldVal));
@@ -121,7 +126,17 @@ public class MessageFactory {
                                 if(objiType==fieldType.getComponentType() ||
                                         (objiType==Integer.class && fieldType.getComponentType()==Long.class)) {
                                     Array.set(arrObj, i, obji);
-                                } else {
+                                } else if (fieldType.getComponentType()==Double.class) {
+                                    if (objiType==Integer.class) {
+                                        Array.set(arrObj, i, Double.valueOf((Integer)obji));
+                                    }else if (objiType==BigDecimal.class) {
+                                        Array.set(arrObj, i, ((BigDecimal)obji).doubleValue());
+                                    } else {
+                                        Array.set(arrObj, i, obji);
+                                    }
+                                }else {
+                                    System.out.println("objiType: " + objiType);
+                                    System.out.println("ComponentType: " + fieldType.getComponentType());
                                     throw new JsonSerializationException("Array component types do not match");
                                 }
                             }
@@ -132,6 +147,8 @@ public class MessageFactory {
                                 throw new JsonSerializationException("Array of type "+fieldType+" is not supported");
                             }
                         } else {
+                            System.out.println("fieldType: " + fieldType);
+                            System.out.println("jsonFieldType: " + jsonFieldType);
                             throw new JsonSerializationException("Field was of incorrect type: "+fieldName);
                         }
                     } else {

@@ -2,6 +2,7 @@ package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.ShapeDrawing.*;
 import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -12,12 +13,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.canvas.*;
 import javafx.scene.shape.*;
 import javafx.scene.input.*;
 import javafx.scene.paint.Color;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * A controller that handle both manager and user operation for the WhiteBoard Application
@@ -66,9 +71,9 @@ public class userController {
 
     protected boolean isUnsaved = false;
 
-    private String modeID;
+    protected GraphicsContext gc;
 
-    private GraphicsContext gc;
+    private String modeID;
 
     private double startX, startY, endX, endY;
 
@@ -76,6 +81,19 @@ public class userController {
 
     // Model
     private User user;
+
+    /**
+     * Convert the given Double array to double array
+     * @param arr - Double array to convert
+     * @return double array converted
+     */
+    private double[] DoubleTodouble(Double[] arr) {
+        double[] value = new double[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            value[i] = arr[i];
+        }
+        return value;
+    }
 
     /**
      * This method sets defaults values and add required listeners for fxml elements to ensure
@@ -95,7 +113,7 @@ public class userController {
                     if (c.wasAdded()) {
                         for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
-
+                            ShapeDrawing shape = (ShapeDrawing) o;
                         }
                     }
                 }
@@ -118,6 +136,7 @@ public class userController {
                                 Color oldValue, Color newValue) {
                 if (oldValue != newValue) {
                     gc.setStroke(newValue);
+                    gc.setFill(newValue);
                 }
             }
         });
@@ -161,9 +180,9 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional(drawedShapes, user.getObjectList());
-        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
-        user.addObjectItem(circleDrawing1);
+        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
+//        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
+//        user.addObjectItem(circleDrawing1);
     }
 
     @FXML
@@ -209,6 +228,8 @@ public class userController {
             switch (modeID) {
                 case "dm_free":
                     pane.getChildren().add(path);
+
+                    path.setStroke(colorPicker.getValue());
 
                     path.getElements().add(new MoveTo(startX, startY));
                     break;
@@ -317,8 +338,8 @@ public class userController {
                     pane.getChildren().remove(path);
 
                     int size = path.getElements().size();
-                    double[] xs = new double[size];
-                    double[] ys = new double[size];
+                    Double[] xs = new Double[size];
+                    Double[] ys = new Double[size];
 
                     gc.beginPath();
 
@@ -335,13 +356,13 @@ public class userController {
                     }
                     gc.stroke();
 
-                    PathDrawing pd = new PathDrawing(xs, ys);
+                    drawedShapes.add(new PathDrawing(xs, ys, colorPicker.getValue()));
                     path.getElements().clear();
                     break;
                 case "dm_line":
                     pane.getChildren().remove(line);
 
-                    drawedShapes.add(new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY()));
+                    drawedShapes.add(new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), colorPicker.getValue()));
 
                     // add shape to canvas via gc
                     gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
@@ -350,7 +371,7 @@ public class userController {
                     double sideLen = Math.min(Math.abs(endX - startX), Math.abs(endY - startY));
                     pane.getChildren().remove(circle);
 
-                    drawedShapes.add(new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY), sideLen));
+                    drawedShapes.add(new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY), sideLen, colorPicker.getValue()));
 
                     // add shape to canvas via gc
                     gc.strokeOval(Math.min(startX, endX), Math.min(startY, endY), sideLen, sideLen);
@@ -359,24 +380,24 @@ public class userController {
                     double w = Math.abs(endX - startX);
                     pane.getChildren().remove(polygon);
 
-                    double[] tri_xs = new double[]{
+                    Double[] tri_xs = new Double[]{
                             Math.min(startX, endX),
                             Math.min(startX, endX) + 0.5 * w,
                             Math.max(startX, endX)};
-                    double[] tri_ys = new double[]{
+                    Double[] tri_ys = new Double[]{
                             Math.max(startY, endY),
                             Math.min(startY, endY),
                             Math.max(startY, endY)
                     };
 
-                    drawedShapes.add(new TriangleDrawing(tri_xs, tri_ys));
+                    drawedShapes.add(new TriangleDrawing(tri_xs, tri_ys, colorPicker.getValue()));
                     // add shape to canvas via gc
-                    gc.strokePolygon(tri_xs, tri_ys, 3);
+                    gc.strokePolygon(DoubleTodouble(tri_xs), DoubleTodouble(tri_ys), 3);
                     break;
                 case "dm_rectangle":
                     pane.getChildren().remove(rectangle);
 
-                    drawedShapes.add(new RectangularDrawing(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight()));
+                    drawedShapes.add(new RectangularDrawing(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight(), colorPicker.getValue()));
 
                     // add shape to canvas via gc
                     gc.strokeRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
@@ -394,20 +415,23 @@ public class userController {
      */
     protected void drawNewShape(ShapeDrawing shape) {
 
-        // set color for gc
+        Color oldColor = (Color)gc.getStroke();
 
         // draw shape based on its type
         switch (shape.getClass().getSimpleName()) {
             case "CircleDrawing":
                 CircleDrawing circleDrawing = (CircleDrawing) shape;
+                gc.setStroke(new Color(circleDrawing.red, circleDrawing.green, circleDrawing.blue, circleDrawing.opacity));
                 gc.strokeOval(circleDrawing.x, circleDrawing.y, circleDrawing.sideLen, circleDrawing.sideLen);
                 break;
             case "LineDrawing":
                 LineDrawing lineDrawing = (LineDrawing) shape;
+                gc.setStroke(new Color(lineDrawing.red, lineDrawing.green, lineDrawing.blue, lineDrawing.opacity));
                 gc.strokeLine(lineDrawing.startX, lineDrawing.startY, lineDrawing.endX, lineDrawing.endY);
                 break;
             case "PathDrawing":
                 PathDrawing pathDrawing = (PathDrawing) shape;
+                gc.setStroke(new Color(pathDrawing.red, pathDrawing.green, pathDrawing.blue, pathDrawing.opacity));
                 gc.beginPath();
 
                 gc.moveTo(pathDrawing.xs[0], pathDrawing.ys[0]);
@@ -419,17 +443,24 @@ public class userController {
                 break;
             case "RectangularDrawing":
                 RectangularDrawing rectangularDrawing = (RectangularDrawing) shape;
+                gc.setStroke(new Color(rectangularDrawing.red, rectangularDrawing.green, rectangularDrawing.blue, rectangularDrawing.opacity));
                 gc.strokeRect(rectangularDrawing.x, rectangularDrawing.y, rectangularDrawing.width, rectangularDrawing.height);
                 break;
             case "TextDrawing":
                 TextDrawing textDrawing = (TextDrawing) shape;
+                gc.setFill(new Color(textDrawing.red, textDrawing.green, textDrawing.blue, textDrawing.opacity));
                 gc.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
                 break;
             case "TriangleDrawing":
                 TriangleDrawing triangleDrawing = (TriangleDrawing) shape;
-                gc.strokePolygon(triangleDrawing.xs, triangleDrawing.ys, 3);
+                gc.setStroke(new Color(triangleDrawing.red, triangleDrawing.green, triangleDrawing.blue, triangleDrawing.opacity));
+                gc.strokePolygon(DoubleTodouble(triangleDrawing.xs), DoubleTodouble(triangleDrawing.ys), 3);
                 break;
         }
+
+        // reset to oldColor
+        gc.setStroke(oldColor);
+        gc.setFill(oldColor);
 
         // add drawed shape to list
         drawedShapes.add(shape);
@@ -450,7 +481,7 @@ public class userController {
             gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
 
             // add drawed shape to list
-            drawedShapes.add(new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text));
+            drawedShapes.add(new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text, colorPicker.getValue()));
 
             // update unsave status
             isUnsaved = true;
