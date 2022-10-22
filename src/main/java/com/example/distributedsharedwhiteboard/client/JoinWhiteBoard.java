@@ -16,13 +16,15 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.example.distributedsharedwhiteboard.Util.util.*;
 
 /**
  * The main class for the White Board user.
- * Handles <Server Address> <Port Number> arguments
+ * Handles <Server Address> <Port Number> <username> arguments
  * and starts up the White Board Apllication for the user.
  * The GUI provide interface for the user to draw shapes, and leave the application.
  *
@@ -31,9 +33,7 @@ public class JoinWhiteBoard {
     static private InetAddress srvAddress;
     static private int srvPort;
     static private String username;
-
     static private User user;
-
     static DataOutputStream output;
     static DataInputStream input;
 
@@ -71,12 +71,13 @@ public class JoinWhiteBoard {
             BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 
             // Send JoinWhiteBoard request to Server
-            writeMsg(bufferedWriter,new JoinRequest(username));
+            writeMsg(bufferedWriter, new JoinRequest(username));
 
             // Receive JoinWhiteBoard reply from server.
             Message msgFromServer;
             try {
                 msgFromServer = readMsg(bufferedReader);
+                System.out.println("received: "+ msgFromServer.toString());
             } catch (JsonSerializationException e1) {
                 writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
                 return;
@@ -86,11 +87,13 @@ public class JoinWhiteBoard {
             if (msgFromServer.getClass().getName() == JoinReply.class.getName()){
                 JoinReply joinReply = (JoinReply)msgFromServer;
                 if (joinReply.success){
-                    List<String> userList = joinReply.userList;
-                    List<String> objectList =joinReply.objectList;
+                    String[] userList = joinReply.userList;
+                    String[] objectList =joinReply.objectList;
                     user = new User(username);
-                    user.setUserList((ObservableList<String>) userList);
-                    user.setObjectList((ObservableList<ShapeDrawing>) TransferFromJsonList(objectList));
+                    user.setUserList(userList);
+
+                    user.setUserList(userList);
+                    user.setObjectList(objectList);
                     Application.launch(UserApplication.class);
                 }
             } else {

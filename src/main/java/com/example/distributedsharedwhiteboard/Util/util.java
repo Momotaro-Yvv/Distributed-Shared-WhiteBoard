@@ -31,9 +31,9 @@ public class util {
      */
     static public Message readMsg(BufferedReader bufferedReader) throws IOException, JsonSerializationException {
         String jsonStr = bufferedReader.readLine();
+        utilLogger.logDebug(jsonStr);
         if(jsonStr!=null) {
             Message msg = (Message) MessageFactory.deserialize(jsonStr);
-            utilLogger.logDebug("received: "+msg.toString());
             return msg;
         } else {
             throw new IOException();
