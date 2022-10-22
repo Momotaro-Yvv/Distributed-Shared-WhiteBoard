@@ -3,16 +3,26 @@ package com.example.distributedsharedwhiteboard.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
+import javafx.scene.paint.Color;
+
 @JsonSerializable
 public class LineDrawing extends ShapeDrawing {
 
     @JsonElement
-    public double startX, startY, endX, endY;
+    public Double startX, startY, endX, endY;
+
+    @JsonElement
+    public Double red, green, blue, opacity;
 
     public LineDrawing() {
     }
 
-    public LineDrawing(double startX, double startY, double endX, double endY) {
+    public LineDrawing(Double startX, Double startY, Double endX, Double endY, Color color) {
+        this.red = color.getRed();
+        this.green = color.getGreen();
+        this.blue = color.getBlue();
+        this.opacity = color.getOpacity();
+
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;

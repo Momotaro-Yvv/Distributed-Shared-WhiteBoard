@@ -5,16 +5,26 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 import java.util.ArrayList;
 
+import javafx.scene.paint.Color;
+
 @JsonSerializable
 public class PathDrawing extends ShapeDrawing {
 
     @JsonElement
-    public double[] xs, ys;
+    public Double[] xs, ys;
+
+    @JsonElement
+    public Double red, green, blue, opacity;
 
     public PathDrawing() {
     }
 
-    public PathDrawing(double[] xs, double[] ys) {
+    public PathDrawing(Double[] xs, Double[] ys, Color color) {
+        this.red = color.getRed();
+        this.green = color.getGreen();
+        this.blue = color.getBlue();
+        this.opacity = color.getOpacity();
+
         this.xs = xs;
         this.ys = ys;
     }
