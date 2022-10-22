@@ -1,7 +1,10 @@
 package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.ShapeDrawing.CircleDrawing;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
+import com.example.distributedsharedwhiteboard.Util.*;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
@@ -22,6 +25,8 @@ import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -81,59 +86,75 @@ public class managerController extends userController {
         manager.addUserItem("Test only : user1");
 
         Bindings.bindContentBidirectional(manager.getObjectList(),pane.getChildren());
-        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
-        manager.addObjectItem(circleDrawing1);
+//        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
+//        manager.addObjectItem(circleDrawing1);
 
         userList.getItems().add("some test");
         userList.getItems().add("more test");
     }
 
     @FXML
-    protected void handleNew() {
+    protected void handleNew(ActionEvent event) {
         // check is there any unsaved changes
         if (isUnsaved) {
             showUnsaveDialog();
         }
 
         // clear all changes
+        drawedShapes.clear();
+
+        // clear the canvas
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        // TODO: send reload request to server
     }
 
     @FXML
-    protected void handleOpen() {
+    protected void handleOpen(ActionEvent event) {
         // prepare file chooser
         FileChooser openfile = new FileChooser();
         openfile.getExtensionFilters().addAll(
-                new ExtensionFilter("Json Files", "*.json"));
+                new ExtensionFilter("txt Files", "*.txt"));
         openfile.setSelectedExtensionFilter(openfile.getExtensionFilters().get(0));
         openfile.setTitle("Open File");
 
         // display the file chooser dialog
         File file = openfile.showOpenDialog(stage);
 
-        // import whiteboard from a json file
+        // import whiteboard from a txt file
         if (file != null) {
             try {
                 // open file reader
-                FileReader reader = new FileReader(file);
+                BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 // add shapes to undrawed list
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    ShapeDrawing shape = util.TransferToShape(line);
+
+                    // TODO: add loaded shapes to undrawed list
+                }
 
                 // close reader
                 reader.close();
 
+            } catch (JsonSerializationException j) {
+                j.printStackTrace();
             } catch (IOException ex) {
                 System.out.println("Error!");
             }
         }
+
+        // TODO: send reload request to server
     }
 
     @FXML
-    protected void handleSave() {
+    protected void handleSave(ActionEvent event) {
 
         // prepare file chooser
         FileChooser savefile = new FileChooser();
         savefile.getExtensionFilters().addAll(
-                new ExtensionFilter("Json Files", "*.json"),
+                new ExtensionFilter("text Files", "*.txt"),
                 new ExtensionFilter("All Files", "*.*"));
         savefile.setSelectedExtensionFilter(savefile.getExtensionFilters().get(0));
         savefile.setTitle("Save File");
@@ -142,19 +163,22 @@ public class managerController extends userController {
         // display the file chooser dialog
         File file = savefile.showSaveDialog(stage);
 
-        // export whiteboard as a json file
+        // export whiteboard as a txt file
         if (file != null) {
             try {
 
                 // open file writer
-                FileWriter fileWriter = new FileWriter(file);
+                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
 
                 // add all drawed shapes to file
-//                fileWriter.write(employeeList.toJSONString());
-//                fileWriter.flush();
+                for (ShapeDrawing s : drawedShapes) {
+                    writer.write(util.TransferFromShape(s));
+                    writer.newLine();
+                    writer.flush();
+                }
 
                 // close file writer
-                fileWriter.close();
+                writer.close();
 
             } catch (IOException ex) {
                 System.out.println("Error!");
@@ -233,7 +257,7 @@ public class managerController extends userController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == btYes) {
             // user chose "yes
-            handleSaveAs(null);
+            handleSave(null);
             return true;
         } else if (result.get() == btNo) {
             // user chose "no"
