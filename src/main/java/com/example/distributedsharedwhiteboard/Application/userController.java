@@ -1,13 +1,16 @@
 package com.example.distributedsharedwhiteboard.Application;
 
-import com.example.distributedsharedwhiteboard.Application.User;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.*;
 import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 
 import javafx.fxml.FXML;
-import javafx.stage.Stage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.canvas.*;
@@ -21,14 +24,10 @@ import javafx.scene.paint.Color;
 public class userController {
 
     @FXML
-    protected Stage stage;
-
-    @FXML
     protected TextField msg;
 
     @FXML
-    protected ListView<String> MsgHistory;
-    // TODO: change css to avoid similarities between msgList & userList
+    protected ListView<String> msgHistory;
 
     @FXML
     protected ListView<String> userList;
@@ -64,39 +63,65 @@ public class userController {
     @FXML
     protected Polygon polygon;
 
-    protected String modeID;
+    protected boolean isUnsaved = false;
 
-    protected GraphicsContext gc;
+    private String modeID;
+
+    private GraphicsContext gc;
 
     private double startX, startY, endX, endY;
 
-    //Model
+    protected ObservableList<ShapeDrawing> drawedShapes;
+
+    // Model
     private User user;
 
-    // This allows the implementing class to perform any necessary post-processing on the content.
-    // It also provides the controller with access to the resources that were used to load the
-    // document and the location that was used to resolve relative paths within the document
-    // (commonly equivalent to the location of the document itself).
-    public void initialize() {
-        user = JoinWhiteBoard.getUser();
-        // bind variables
-        Bindings.bindContentBidirectional(MsgHistory.getItems(), user.getMsgList());
-        user.addMsgItem("test only : message"); // now can access msgHistory via msgList
+    /**
+     * This method sets defaults values and add required listeners for fxml elements to ensure
+     * fxml elements are working properly.
+     */
+    protected void setUp() {
 
-        Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
-        user.addUserItem("Test only : user1");
+        // prepare shape list
+        drawedShapes = FXCollections.observableArrayList();
+        drawedShapes.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
 
-        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
-        com.example.distributedsharedwhiteboard.Shape.Circle circle1 = new com.example.distributedsharedwhiteboard.Shape.Circle(1, 1, 1);
-        user.addObjectItem(circle1);
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (ShapeDrawing s : change.getAddedSubList()) {
+                            // ask user to send a updateRequest to server
+
+                        }
+                    }
+                }
+            }
+
+        });
 
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
 
-        // set default color as black
-        colorPicker.setValue(Color.BLACK);
+        // prepare graphic handle
+        gc = canvas.getGraphicsContext2D();
 
-        // prepare shapes for canvas
+        // prepare color picker
+        colorPicker.setValue(Color.BLACK);
+        colorPicker.getStyleClass().add("button");
+        colorPicker.valueProperty().addListener(new ChangeListener<Color>() {
+            @Override
+            public void changed(ObservableValue<? extends Color> observable,
+                                Color oldValue, Color newValue) {
+                if (oldValue != newValue) {
+                    gc.setStroke(newValue);
+                }
+            }
+        });
+
+        // prepare shapes for drawing
         line = new Line();
         textfield = new TextField();
         circle = new Circle();
@@ -104,16 +129,40 @@ public class userController {
         path = new Path();
         polygon = new Polygon();
 
-        // set listener for textfield
+        // set listeners to textfield
         textfield.setOnAction(e -> {
-            drawText(textfield.getText());
+            // draw text when user press enter
+            drawText();
         });
 
         textfield.focusedProperty().addListener((obs, oldVal, newVal) -> {
             if( newVal == false) {
-                drawText(textfield.getText());
+                // draw text when user unfocus the textfield
+                drawText();
             }
         });
+    }
+
+    /**
+     * This method is called to initialize a controller after its root element has been completely processed
+     * which means all fxml elements have been successfully loaded.
+     */
+    public void initialize() {
+
+        // set up default settings
+        setUp();
+
+        user = JoinWhiteBoard.getUser();
+        // bind variables
+        Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
+        user.addMsgItem("test only : message"); // now can access msgHistory via msgList
+
+        Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
+        user.addUserItem("Test only : user1");
+
+        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
+        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
+        user.addObjectItem(circleDrawing1);
     }
 
     @FXML
@@ -129,7 +178,7 @@ public class userController {
             System.out.println(input);
 
             // add msg to message history
-            MsgHistory.getItems().add("user54686: " + input);
+            msgHistory.getItems().add("user54686: " + input);
 
             // clear input
             msg.clear();
@@ -138,6 +187,7 @@ public class userController {
 
     @FXML
     protected void handleQuit(ActionEvent event) {
+
         user.sendQuitMsg();
         Platform.exit();
     }
@@ -147,7 +197,6 @@ public class userController {
 
         // check mouse event
         if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            System.out.println("Mouse pressed");
 
             // set drawing mode
             modeID = ((ToggleButton)(drawMode.getSelectedToggle())).getId();
@@ -160,20 +209,13 @@ public class userController {
                 case "dm_free":
                     pane.getChildren().add(path);
 
-                    path.setStroke(colorPicker.getValue());
-
                     path.getElements().add(new MoveTo(startX, startY));
                     break;
                 case "dm_text":
                     // if a textbox is already existed
                     if (pane.getChildren().contains(textfield)) {
 
-                        // if textbox contain some text
-                        if (textfield.getText().length() > 0) {
-                            drawText(textfield.getText());
-                        } else {
-                            pane.getChildren().remove(textfield);
-                        }
+                        drawText();
                     }
                     pane.getChildren().add(textfield);
                     textfield.setLayoutX(startX);
@@ -226,7 +268,7 @@ public class userController {
             }
 
         }else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-            System.out.println("Mouse dragged");
+
             endX = event.getX();
             endY = event.getY();
 
@@ -265,7 +307,7 @@ public class userController {
             }
 
         } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
-            System.out.println("Mouse released");
+
             endX = event.getX();
             endY = event.getY();
 
@@ -273,82 +315,155 @@ public class userController {
                 case "dm_free":
                     pane.getChildren().remove(path);
 
-                    // add shape to canvas via gc
-                    gc = canvas.getGraphicsContext2D();
-                    gc.setStroke(colorPicker.getValue());
+                    int size = path.getElements().size();
+                    double[] xs = new double[size];
+                    double[] ys = new double[size];
 
                     gc.beginPath();
-                    for (int i = 1; i < path.getElements().size(); i++) {
+
+                    MoveTo mt = (MoveTo) path.getElements().get(0);
+                    gc.moveTo(mt.getX(), mt.getY());
+                    xs[0] = mt.getX();
+                    ys[0] = mt.getY();
+
+                    for (int i = 1; i < size; i++) {
                         LineTo lt = (LineTo) path.getElements().get(i);
                         gc.lineTo(lt.getX(), lt.getY());
+                        xs[i] = lt.getX();
+                        ys[i] = lt.getY();
                     }
                     gc.stroke();
 
+                    PathDrawing pd = new PathDrawing(xs, ys);
                     path.getElements().clear();
                     break;
                 case "dm_line":
                     pane.getChildren().remove(line);
 
+                    drawedShapes.add(new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY()));
+
                     // add shape to canvas via gc
-                    gc = canvas.getGraphicsContext2D();
-                    gc.setStroke(colorPicker.getValue());
                     gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
                     break;
                 case "dm_circle":
                     double sideLen = Math.min(Math.abs(endX - startX), Math.abs(endY - startY));
                     pane.getChildren().remove(circle);
 
+                    drawedShapes.add(new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY), sideLen));
+
                     // add shape to canvas via gc
-                    gc = canvas.getGraphicsContext2D();
-                    gc.setStroke(colorPicker.getValue());
                     gc.strokeOval(Math.min(startX, endX), Math.min(startY, endY), sideLen, sideLen);
                     break;
                 case "dm_triangle":
                     double w = Math.abs(endX - startX);
                     pane.getChildren().remove(polygon);
 
-                    // add shape to canvas via gc
-                    gc = canvas.getGraphicsContext2D();
-                    gc.setStroke(colorPicker.getValue());
+                    double[] tri_xs = new double[]{
+                            Math.min(startX, endX),
+                            Math.min(startX, endX) + 0.5 * w,
+                            Math.max(startX, endX)};
+                    double[] tri_ys = new double[]{
+                            Math.max(startY, endY),
+                            Math.min(startY, endY),
+                            Math.max(startY, endY)
+                    };
 
-                    gc.strokePolygon(new double[]{
-                                    Math.min(startX, endX),
-                                    Math.min(startX, endX) + 0.5 * w,
-                                    Math.max(startX, endX)},
-                            new double[]{
-                                    Math.max(startY, endY),
-                                    Math.min(startY, endY),
-                                    Math.max(startY, endY)}, 3);
+                    drawedShapes.add(new TriangleDrawing(tri_xs, tri_ys));
+                    // add shape to canvas via gc
+                    gc.strokePolygon(tri_xs, tri_ys, 3);
                     break;
                 case "dm_rectangle":
                     pane.getChildren().remove(rectangle);
 
+                    drawedShapes.add(new RectangularDrawing(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight()));
+
                     // add shape to canvas via gc
-                    gc = canvas.getGraphicsContext2D();
-                    gc.setStroke(colorPicker.getValue());
                     gc.strokeRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
                     break;
             }
         }
+
+        // update unsave status
+        isUnsaved = true;
     }
 
-    // TODO: draw shape from server update
-    protected void drawNewShape(Shape shape) {
-        // find shape type
-        System.out.println(shape.getClass());
+    /**
+     * Invoke this method to draw a shape onto whiteboard
+     * @param shape - shape to draw
+     */
+    protected void drawNewShape(ShapeDrawing shape) {
+
+        // set color for gc
+
+        // draw shape based on its type
+        switch (shape.getClass().getSimpleName()) {
+            case "CircleDrawing":
+                CircleDrawing circleDrawing = (CircleDrawing) shape;
+                gc.strokeOval(circleDrawing.x, circleDrawing.y, circleDrawing.sideLen, circleDrawing.sideLen);
+                break;
+            case "LineDrawing":
+                LineDrawing lineDrawing = (LineDrawing) shape;
+                gc.strokeLine(lineDrawing.startX, lineDrawing.startY, lineDrawing.endX, lineDrawing.endY);
+                break;
+            case "PathDrawing":
+                PathDrawing pathDrawing = (PathDrawing) shape;
+                gc.beginPath();
+
+                gc.moveTo(pathDrawing.xs[0], pathDrawing.ys[0]);
+
+                for (int i = 1; i < pathDrawing.xs.length; i++) {
+                    gc.lineTo(pathDrawing.xs[i], pathDrawing.ys[i]);
+                }
+                gc.stroke();
+                break;
+            case "RectangularDrawing":
+                RectangularDrawing rectangularDrawing = (RectangularDrawing) shape;
+                gc.strokeRect(rectangularDrawing.x, rectangularDrawing.y, rectangularDrawing.width, rectangularDrawing.height);
+                break;
+            case "TextDrawing":
+                TextDrawing textDrawing = (TextDrawing) shape;
+                gc.fillText(textDrawing.text, textDrawing.x, textDrawing.y);
+                break;
+            case "TriangleDrawing":
+                TriangleDrawing triangleDrawing = (TriangleDrawing) shape;
+                gc.strokePolygon(triangleDrawing.xs, triangleDrawing.ys, 3);
+                break;
+        }
+
+        // add drawed shape to list
+        drawedShapes.add(shape);
+
+        // update unsave status
+        isUnsaved = true;
     }
 
-    protected void drawText(String text) {
-        gc = canvas.getGraphicsContext2D();
-        gc.setStroke(colorPicker.getValue());
+    /**
+     * Invoke this method to draw the text from textfield. If textfield is empty then
+     * no drawing is performed.
+     */
+    protected void drawText() {
 
-        gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
+        String text = textfield.getText();
 
-        textfield.clear();
+        if (text.length() > 0) {
+            gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
+
+            // add drawed shape to list
+            drawedShapes.add(new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text));
+
+            // update unsave status
+            isUnsaved = true;
+
+            textfield.clear();
+        }
+
         pane.getChildren().remove(textfield);
     }
 
-    // Invoke this message to display a dialog with error message
+    /**
+     * Invoke this message to display a dialog with error message
+     * @param message - the message to display
+     */
     protected void showErrorDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error Dialog");
@@ -358,7 +473,10 @@ public class userController {
         alert.showAndWait();
     }
 
-    // Invoke this message to display a dialog with info message
+    /**
+     * Invoke this message to display a dialog with info message
+     * @param message - the message to display
+     */
     protected void showInfoDialog(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Info Dialog");
@@ -370,4 +488,5 @@ public class userController {
     public void setUser(User user) {
         this.user = user;
     }
+
 }
