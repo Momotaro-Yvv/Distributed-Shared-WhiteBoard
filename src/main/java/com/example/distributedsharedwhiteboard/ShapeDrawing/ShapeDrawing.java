@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard.Shape;
+package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.MessageFactory;
@@ -6,9 +6,11 @@ import com.example.distributedsharedwhiteboard.message.MessageFactory;
 /**
  *  Fundamental plane figures
  */
-public class Shape {
+public class ShapeDrawing {
 
-    public Shape() {
+    // parameters for color
+
+    public ShapeDrawing() {
     }
 
     @Override

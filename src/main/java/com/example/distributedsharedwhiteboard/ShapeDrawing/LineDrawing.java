@@ -1,18 +1,18 @@
-package com.example.distributedsharedwhiteboard.Shape;
+package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 @JsonSerializable
-public class Line extends Shape {
+public class LineDrawing extends ShapeDrawing {
 
     @JsonElement
-    double startX, startY, endX, endY;
+    public double startX, startY, endX, endY;
 
-    public Line() {
+    public LineDrawing() {
     }
 
-    public Line(double startX, double startY, double endX, double endY) {
+    public LineDrawing(double startX, double startY, double endX, double endY) {
         this.startX = startX;
         this.startY = startY;
         this.endX = endX;

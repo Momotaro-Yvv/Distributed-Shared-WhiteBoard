@@ -1,18 +1,18 @@
-package com.example.distributedsharedwhiteboard.Shape;
+package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 @JsonSerializable
-public class Rectangular extends Shape{
+public class RectangularDrawing extends ShapeDrawing {
 
     @JsonElement
-    double x, y, width, height;
+    public double x, y, width, height;
 
-    public Rectangular() {
+    public RectangularDrawing() {
     }
 
-    public Rectangular(double x, double y, double width, double height) {
+    public RectangularDrawing(double x, double y, double width, double height) {
         this.x = x;
         this.y = y;
         this.width = width;

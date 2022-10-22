@@ -1,4 +1,4 @@
-package com.example.distributedsharedwhiteboard.Shape;
+package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
@@ -6,15 +6,15 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 import java.util.ArrayList;
 
 @JsonSerializable
-public class Path extends Shape{
+public class PathDrawing extends ShapeDrawing {
 
     @JsonElement
-    ArrayList<Double> xs, ys;
+    public double[] xs, ys;
 
-    public Path() {
+    public PathDrawing() {
     }
 
-    public Path(ArrayList<Double> xs, ArrayList<Double> ys) {
+    public PathDrawing(double[] xs, double[] ys) {
         this.xs = xs;
         this.ys = ys;
     }

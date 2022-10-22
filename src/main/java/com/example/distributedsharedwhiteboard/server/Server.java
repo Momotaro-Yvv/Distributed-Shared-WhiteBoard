@@ -1,7 +1,7 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Logger;
-import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.Util.util;
 import com.example.distributedsharedwhiteboard.message.*;
@@ -217,8 +217,8 @@ public class Server {
             case "DrawRequest":
                 DrawRequest drawRequest = (DrawRequest) message;
                 String jsonShape = drawRequest.shape;
-                Shape shape = TransferToShape(jsonShape);
-                objectsList.addAnObject(shape);
+                ShapeDrawing shapeDrawing = TransferToShape(jsonShape);
+                objectsList.addAnObject(shapeDrawing);
 //              util.writeMsg(); to all users in userList
                 break;
             case "KickRequest":
