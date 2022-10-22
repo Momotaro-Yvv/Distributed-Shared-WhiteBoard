@@ -8,7 +8,7 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
  */
 
 @JsonSerializable
-public class ApproveReply {
+public class ApproveReply extends Message{
 
     @JsonElement
     public Boolean approve;

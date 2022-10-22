@@ -13,12 +13,12 @@ public class UpdateMsgRequest extends Message{
     public String msg;
 
     @JsonElement
-    public String sender;
+    public String byWhom;
 
     public UpdateMsgRequest(){}
 
-    public UpdateMsgRequest(String sender, String msg){
-        this.sender = sender;
+    public UpdateMsgRequest(String msg,String byWhom){
+        this.byWhom = byWhom;
         this.msg = msg;
     }
 

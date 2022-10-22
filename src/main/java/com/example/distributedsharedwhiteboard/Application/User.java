@@ -12,13 +12,12 @@ import java.util.List;
 import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
 
 public class User {
-    Boolean isManager = false;
+    private Boolean isManager = false;
     private SimpleStringProperty userName;
 
 //    bidirectionalList
 
     private ObservableList<ShapeDrawing> objectList;
-
 
     private ObservableList<String> msgList;
 

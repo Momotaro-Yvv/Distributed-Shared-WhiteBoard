@@ -1,11 +1,18 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.message.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 public class UserList {
     private String managerName;
@@ -17,8 +24,11 @@ public class UserList {
 
     private List<String> userList;
 
+    private HashMap<String, Socket> userSockets;
+
     protected UserList() {
         userList = new ArrayList<>();
+        userSockets = new HashMap<>();
     }
 
     /**
@@ -26,10 +36,11 @@ public class UserList {
      * @param name the username provided by client
      * @return true if no repeated name in the list otherwise false
      */
-    protected Boolean addAUser (String name){
+    protected Boolean addAUser (String name, Socket client){
         if (! userList.contains(name)){
             userList.add(name);
-            logger.logDebug("New User Added:"+ name);
+            userSockets.put(name, client);
+            logger.logDebug("A new User Added:"+ name);
             return true;
         } else {
             logger.logDebug("User name already exist");
@@ -39,6 +50,7 @@ public class UserList {
 
     public void clearUserList(){
         userList.clear();
+        userSockets.clear();
     }
 
     /**
@@ -67,6 +79,13 @@ public class UserList {
     public boolean userQuit (String username){
         if (userList.contains(username)){
             userList.remove(username);
+            try {
+                userSockets.get(username).close();
+            } catch (IOException e) {
+                logger.logWarn("Something wrong happened when closing client socket for user" + username);
+                throw new RuntimeException(e);
+            }
+            userSockets.remove(username);
             return true;
         } else{
             logger.logDebug("User was not in UserList...");
@@ -79,6 +98,7 @@ public class UserList {
         if (managerName == manager) {
             if (userList.contains(userName)){
                 userList.remove(userName);
+                userSockets.remove(userName);
                 return true;
             } else{
                 logger.logWarn("Delete failed: this username not exist.");
@@ -90,20 +110,40 @@ public class UserList {
         }
     }
 
-    public Boolean setManager (String name){
+    public Boolean setManager (String name, Socket socket){
         if (userList.size() == 0) {
             managerName = name;
             userList.add(name);
+            userSockets.put(name, socket);
             return true;
         } else {
             logger.logDebug("This White board already has a manager.");
             return false;
         }
+    }
 
+    //Getters
+
+    /**
+     * @return all sockets of current users
+     */
+    protected Collection<Socket> getAllSockets() {
+        return userSockets.values();
+    }
+
+    public Socket getManagerSocket (){
+        return userSockets.get(managerName);
+    }
+
+    public Socket getUserSocketByName (String userName){
+        return userSockets.get(userName);
     }
 
     public int getListSize(){
         return userList.size();
     }
 
+    public String getManagerName() {
+        return managerName;
+    }
 }
