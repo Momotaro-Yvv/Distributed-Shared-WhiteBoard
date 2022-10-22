@@ -13,6 +13,7 @@ import java.util.Objects;
 
 public class UserApplication extends Application {
 
+    static private User user;
     @Override
     public void start(Stage stage) throws IOException {
 
@@ -31,5 +32,13 @@ public class UserApplication extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void setUser(User user) {
+        UserApplication.user = user;
+    }
+
+    public static User getUser() {
+        return user;
     }
 }

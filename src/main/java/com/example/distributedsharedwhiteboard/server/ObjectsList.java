@@ -1,10 +1,14 @@
 package com.example.distributedsharedwhiteboard.server;
 
 import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.Util.util;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.example.distributedsharedwhiteboard.Util.util.TransferToShapeList;
 
 public class ObjectsList {
     private ArrayList<ShapeDrawing> objects;
@@ -19,11 +23,11 @@ public class ObjectsList {
         objects.remove(shapeDrawing);
     };
 
-    public List<String> getObjects() {
-        List<String> shapes = new ArrayList<>();
-        for (ShapeDrawing shapeDrawing : objects){
-            shapes.add(util.TransferFromShape(shapeDrawing));
-        }
-        return shapes;
+    public void clearObjectList(){
+        objects.clear();
+    }
+
+    public List<String> getObjects(){
+        return TransferToShapeList(objects);
     }
 }

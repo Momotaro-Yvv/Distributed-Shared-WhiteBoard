@@ -71,7 +71,7 @@ public class managerController extends userController {
 
         setUp();
 
-        manager = (Manager) CreateWhiteBoard.getUser();
+        manager = CreateWhiteBoard.getManager();
 
         // bind variables
         Bindings.bindContentBidirectional(manager.getMsgList(), msgHistory.getItems());
@@ -80,7 +80,7 @@ public class managerController extends userController {
         Bindings.bindContentBidirectional(manager.getUserList(),userList.getItems());
         manager.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional(manager.getObjectList(),pane.getChildren());
+        Bindings.bindContentBidirectional(drawedShapes, manager.getObjectList());
         CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
         manager.addObjectItem(circleDrawing1);
 

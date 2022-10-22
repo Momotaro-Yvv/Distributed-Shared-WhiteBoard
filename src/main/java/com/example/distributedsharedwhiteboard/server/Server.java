@@ -25,13 +25,13 @@ public class Server {
     private static InetAddress svrIPAddress;
     private static int svrPort;
 
+    private static int timeout = 2000;
     private static UserList userList;
     private static ObjectsList objectsList;
     private static MsgList msgList;
 
-
-    static Logger svrLogger = new Logger();
-    final static String welcomeMsg = " --- Welcome to Distributed Share White Board Server ---";
+    private static Logger svrLogger = new Logger();
+    private final static String welcomeMsg = " --- Welcome to Distributed Share White Board Server ---";
 
     public static void main(String[] args) {
 
@@ -67,57 +67,62 @@ public class Server {
     }
 
     private static void serveClient(Socket client) {
-        try(Socket clientSocket = client) {
-            String clientIp = client.getInetAddress().getHostAddress();
-            int clientPort = client.getPort();
-            svrLogger.logDebug("Under new server thread, received Client request from " + clientIp + ":" + clientPort);
+        try{
+            client.setSoTimeout(timeout);
 
-            DataInputStream input = new DataInputStream(clientSocket.getInputStream());
-            DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
+            try(Socket clientSocket = client) {
+                String clientIp = client.getInetAddress().getHostAddress();
+                int clientPort = client.getPort();
+                svrLogger.logDebug("Under new server thread, received Client request from " + clientIp + ":" + clientPort);
 
-            // get a message
-            Message msgFromClient;
-            try {
-                msgFromClient = util.readMsg(bufferedReader);
-            } catch (JsonSerializationException e1) {
-                writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
-                return;
-            }
+                DataInputStream input = new DataInputStream(clientSocket.getInputStream());
+                DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8));
 
-            svrLogger.logDebug("MESSAGE FROM CLIENT: "+ msgFromClient);
-
-            Boolean success;
-            if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
-                success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientIp, clientPort);
-            } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
-                success = handleJoinRequest(bufferedWriter, (JoinRequest) msgFromClient, clientIp, clientPort);
-            } else {
-                writeMsg(bufferedWriter,new ErrorMsg("Expecting JoinRequest or CreateRequest"));
-                return;
-            }
-
-
-            // If the above login is successful, waiting for more messages from Client
-            while(success){
-                if(bufferedReader.ready()){
-
-                    // get a message
-                    Message msg;
-                    try {
-                        msg = util.readMsg(bufferedReader);
-                    } catch (JsonSerializationException e1) {
-                        util.writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
-                        return;
-                    };
-
-                    // process the request message
-                    handleCommand(bufferedWriter,msg);
+                // get a message
+                Message msgFromClient;
+                try {
+                    msgFromClient = util.readMsg(bufferedReader);
+                } catch (JsonSerializationException e1) {
+                    writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+                    return;
                 }
+
+                Boolean success;
+                if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
+                    success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientIp, clientPort);
+                } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
+                    success = handleJoinRequest(bufferedWriter, (JoinRequest) msgFromClient, clientIp, clientPort);
+                } else {
+                    writeMsg(bufferedWriter,new ErrorMsg("Expecting JoinRequest or CreateRequest"));
+                    return;
+                }
+
+
+                // If the above login is successful, waiting for more messages from Client
+                while(success){
+                    if(bufferedReader.ready()){
+
+                        // get a message
+                        Message msg;
+                        try {
+                            msg = util.readMsg(bufferedReader);
+                        } catch (JsonSerializationException e1) {
+                            util.writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
+                            return;
+                        };
+
+                        // process the request message
+                        handleCommand(bufferedWriter,msg);
+                    }
+                }
+            } catch (IOException | JsonSerializationException e) {
+                svrLogger.logError("Encounter Json Serialization Exception. Invalid message, please try again.");
             }
-        } catch (IOException | JsonSerializationException e) {
-            svrLogger.logError("Encounter Json Serialization Exception. Invalid message, please try again.");
+
+        } catch(IOException e){
+            svrLogger.logWarn("Something went wrong with the connection");
         }
     }
 
@@ -162,13 +167,13 @@ public class Server {
     private static boolean handleCreateRequest(BufferedWriter bufferedWriter, CreateRequest msg,String ip, int port)
             throws IOException {
         //save this client as manager, and add to User list, return managerId
-        svrLogger.logDebug("Client want to create a White Board");
-        if (userList.getListSize() == 0) {
-            String managerName = msg.username;
-            Boolean success = userList.setManager(managerName);
+        svrLogger.logDebug("Client want to create a White Board...");
+        String managerName = msg.username;
+        Boolean success = userList.setManager(managerName);
+        if (success) {
             objectsList = new ObjectsList();
             msgList = new MsgList();
-            writeMsg(bufferedWriter,new CreateReply(success));
+            writeMsg(bufferedWriter,new CreateReply(true));
             return true;
         } else {
             String errorMsg = "This White Board already have a manager. Please try other server port";
@@ -179,8 +184,7 @@ public class Server {
 
     /**
      * This function will deal with users' initial Join WB request,
-     * If the WB hasn't had the manager then the
-     * {@ handleCreateRequest} will be transparently called,
+     * If the WB hasn't had the manager then the handleCreateRequest will be transparently called,
      * otherwise this user will be added to existed userList
      * @return false if failed to parse command, otherwise true and send JoinReply
      */
@@ -190,19 +194,19 @@ public class Server {
         String userName = msg.username;
 
         if (userList.getListSize() > 0) {
-            if (!userList.checkAUser(userName)) {
-                Boolean success = userList.addAUser(userName);
+            Boolean success = userList.addAUser(userName);
+            if (success) {
                 svrLogger.logDebug("A new user:"+ userName + " has been added");
-                writeMsg(bufferedWriter, new JoinReply(success, userList.getAllNames(), objectsList.getObjects()));
+                writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
                 return true;
             } else {
                 writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
                 return false;
             }
         } else{
-            svrLogger.logDebug("The White board does not owned by a manager yet, transparently call handleCreateRequest");
-            Boolean result = handleCreateRequest(bufferedWriter, new CreateRequest(userName), ip, port);
-            return result;
+            String error = "The White board does not owned by a manager yet, You can create a White board";
+            writeMsg(bufferedWriter, new ErrorMsg(error));
+            return false;
         }
     }
 
@@ -217,35 +221,40 @@ public class Server {
             case "DrawRequest":
                 DrawRequest drawRequest = (DrawRequest) message;
                 String jsonShape = drawRequest.shape;
+                String drawBy = drawRequest.username;
+
                 ShapeDrawing shapeDrawing = TransferToShape(jsonShape);
                 objectsList.addAnObject(shapeDrawing);
-//              util.writeMsg(); to all users in userList
+                util.writeMsg(bufferedWriter, new DrawReply());
                 break;
             case "KickRequest":
                 KickRequest kickRequest = (KickRequest) message;
-                String managername = kickRequest.managerName;
+                String managerName = kickRequest.managerName;
                 String username = kickRequest.username;
-                Boolean success = userList.kickOutUser(managername, username);
-//              util.writeMsg(); to all users in userList
+                Boolean success = userList.kickOutUser(managerName, username);
+                if (success){
+                    util.writeMsg(bufferedWriter, new KickReply(true));
+                }
                 break;
             case "QuitMsg":
-                QuitRequest message3 = (QuitRequest) message;
-                String userQuitting = message3.username;
+                QuitRequest quitRequest = (QuitRequest) message;
+                String userQuitting = quitRequest.username;
                 Boolean success1 = userList.userQuit(userQuitting);
-//              util.writeMsg(); to all users in userList
+                if (success1){
+                    util.writeMsg(bufferedWriter, new QuitReply(true));
+                }
                 break;
             case "TerminateWB":
-                TerminateWB message4 = (TerminateWB) message;
-//              util.writeMsg(); Goodbye to all users in userList
+                TerminateWB terminate = (TerminateWB) message;
+                userList.clearUserList();
+                objectsList.clearObjectList();
+                msgList.clearMsgList();
+                util.writeMsg(bufferedWriter,new Goodbye());
                 break;
 
             default:
-                try {
-                    writeMsg(bufferedWriter,new ErrorMsg("Expecting a request message"));
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                writeMsg(bufferedWriter,new ErrorMsg("Expecting a request message"));
+
         }
     }
 

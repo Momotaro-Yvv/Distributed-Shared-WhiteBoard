@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 
 import javafx.fxml.FXML;
@@ -92,7 +93,7 @@ public class userController {
 
                     // if anything was added to list
                     if (c.wasAdded()) {
-                        for (ShapeDrawing s : change.getAddedSubList()) {
+                        for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
 
                         }
@@ -160,7 +161,7 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
+        Bindings.bindContentBidirectional(drawedShapes, user.getObjectList());
         CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
         user.addObjectItem(circleDrawing1);
     }

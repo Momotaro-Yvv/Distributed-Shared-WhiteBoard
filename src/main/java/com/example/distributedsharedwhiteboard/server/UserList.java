@@ -37,6 +37,10 @@ public class UserList {
         }
     }
 
+    public void clearUserList(){
+        userList.clear();
+    }
+
     /**
      * @return all names of current users
      */
@@ -92,7 +96,7 @@ public class UserList {
             userList.add(name);
             return true;
         } else {
-            logger.logDebug("this White board already has a manager.");
+            logger.logDebug("This White board already has a manager.");
             return false;
         }
 
