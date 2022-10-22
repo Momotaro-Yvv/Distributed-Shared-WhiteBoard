@@ -218,7 +218,7 @@ public class Server {
     private static void handleCommand(BufferedWriter bufferedWriter, Message message) throws JsonSerializationException, IOException {
         String command = message.getClass().getName();
         switch(command) {
-            case "DrawRequest":
+            case "com.example.distributedsharedwhiteboard.message.DrawRequest":
                 DrawRequest drawRequest = (DrawRequest) message;
                 String jsonShape = drawRequest.shape;
                 String drawBy = drawRequest.username;
@@ -227,7 +227,7 @@ public class Server {
                 objectsList.addAnObject(shapeDrawing);
                 util.writeMsg(bufferedWriter, new DrawReply());
                 break;
-            case "KickRequest":
+            case "com.example.distributedsharedwhiteboard.message.KickRequest":
                 KickRequest kickRequest = (KickRequest) message;
                 String managerName = kickRequest.managerName;
                 String username = kickRequest.username;
@@ -236,7 +236,7 @@ public class Server {
                     util.writeMsg(bufferedWriter, new KickReply(true));
                 }
                 break;
-            case "QuitMsg":
+            case "com.example.distributedsharedwhiteboard.message.QuitMsg":
                 QuitRequest quitRequest = (QuitRequest) message;
                 String userQuitting = quitRequest.username;
                 Boolean success1 = userList.userQuit(userQuitting);
@@ -244,7 +244,7 @@ public class Server {
                     util.writeMsg(bufferedWriter, new QuitReply(true));
                 }
                 break;
-            case "TerminateWB":
+            case "com.example.distributedsharedwhiteboard.message.TerminateWB":
                 TerminateWB terminate = (TerminateWB) message;
                 userList.clearUserList();
                 objectsList.clearObjectList();

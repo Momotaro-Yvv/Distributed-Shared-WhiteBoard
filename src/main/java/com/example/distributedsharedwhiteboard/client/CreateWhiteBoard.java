@@ -19,7 +19,7 @@ import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 /**
  * The main class for the White Board manager.
- * Handles <Server Address> <Port Number> arguments
+ * Handles <Server Address> <Port Number> <username> arguments
  * and starts up the White Board Apllication for the manager.
  * The GUI provide interface for the manager to draw shapes,
  * to kick out users, and terminates the application.
@@ -73,6 +73,7 @@ public class CreateWhiteBoard {
             Message msgFromServer;
             try {
                 msgFromServer = readMsg(bufferedReader);
+                System.out.println("received: "+ msgFromServer.toString());
             } catch (JsonSerializationException e1) {
                 writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
                 return;

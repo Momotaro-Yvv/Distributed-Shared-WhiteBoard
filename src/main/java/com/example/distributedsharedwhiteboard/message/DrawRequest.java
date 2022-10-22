@@ -14,6 +14,7 @@ public class DrawRequest extends Message{
     @JsonElement
     public String shape;
 
+    @JsonElement
     public String username;
     public DrawRequest(){};
 

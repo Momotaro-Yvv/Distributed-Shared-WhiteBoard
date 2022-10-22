@@ -1,18 +1,15 @@
 package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
-import javafx.beans.property.SimpleIntegerProperty;
+import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Polygon;
-import javafx.scene.text.Text;
 
-import java.net.InetAddress;
+import java.io.IOException;
+import java.util.List;
+
+import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
 
 public class User {
     Boolean isManager = false;
@@ -101,16 +98,22 @@ public class User {
 
     //Setters
 
-    public void setObjectList(ObservableList<ShapeDrawing> objectList) {
-        this.objectList = objectList;
+    public void setObjectList(String[] objectList) throws JsonSerializationException, IOException {
+        for (String string: objectList){
+            this.objectList.add(TransferToShape(string));
+        }
     }
 
-    public void setMsgList(ObservableList<String> msgList) {
-        this.msgList = msgList;
+    public void setMsgList(String[] msgList) {
+        for (String string: msgList){
+            this.msgList.add(string);
+        }
     }
 
-    public void setUserList(ObservableList<String> userList) {
-        this.userList = userList;
+    public void setUserList(String[] userList) {
+        for (String string: userList){
+        this.userList.add(string);
+        }
     }
 
     //Methods

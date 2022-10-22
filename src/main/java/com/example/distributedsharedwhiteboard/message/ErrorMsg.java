@@ -9,9 +9,6 @@ public class ErrorMsg extends Message {
     @JsonElement
     public String msg;
 
-    @JsonElement
-    public String msgClassName;
-
     public ErrorMsg() {
 
     }
