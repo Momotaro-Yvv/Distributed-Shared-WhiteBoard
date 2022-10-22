@@ -59,7 +59,7 @@
                                 </Text>
                             </children>
                         </VBox>
-                        <ListView fx:id="MsgHistory">
+                        <ListView fx:id="msgHistory">
                      <VBox.margin>
                         <Insets left="5.0" right="5.0" top="5.0" />
                      </VBox.margin></ListView>

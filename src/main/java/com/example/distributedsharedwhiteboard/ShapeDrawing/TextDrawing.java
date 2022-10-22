@@ -1,21 +1,21 @@
-package com.example.distributedsharedwhiteboard.Shape;
+package com.example.distributedsharedwhiteboard.ShapeDrawing;
 
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
 @JsonSerializable
-public class Text extends Shape{
+public class TextDrawing extends ShapeDrawing {
 
     @JsonElement
-    double x, y;
+    public double x, y;
 
     @JsonElement
-    String text;
+    public String text;
 
-    public Text() {
+    public TextDrawing() {
     }
 
-    public Text(double x, double y, String text) {
+    public TextDrawing(double x, double y, String text) {
         this.x = x;
         this.y = y;
         this.text = text;

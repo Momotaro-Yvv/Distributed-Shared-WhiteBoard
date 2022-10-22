@@ -1,7 +1,8 @@
 package com.example.distributedsharedwhiteboard.Application;
 
+import com.example.distributedsharedwhiteboard.ShapeDrawing.CircleDrawing;
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
-import com.example.distributedsharedwhiteboard.Shape.Text;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -11,8 +12,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.control.*;
@@ -21,26 +20,21 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
 public class managerController extends userController {
-    private Manager user; // TODO: find the reason that user become null
+
+    private Manager manager;
+
+    private Stage stage;
 
     @Override
-    public void initialize(){
-        user = (Manager) CreateWhiteBoard.getUser();
-        // bind variables
-        Bindings.bindContentBidirectional(user.getMsgList(), MsgHistory.getItems());
-        user.addMsgItem("test only : message"); // now can access msgHistory via msgList
-
-        Bindings.bindContentBidirectional(user.getUserList(),userList.getItems());
-        user.addUserItem("Test only : user1");
-
-        Bindings.bindContentBidirectional(user.getObjectList(),pane.getChildren());
-        com.example.distributedsharedwhiteboard.Shape.Circle circle1 = new com.example.distributedsharedwhiteboard.Shape.Circle(1, 1, 1);
-        user.addObjectItem(circle1);
+    protected void setUp() {
+        super.setUp();
 
         // set user cell
         userList.setCellFactory(lv -> {
@@ -53,7 +47,7 @@ public class managerController extends userController {
             kickOutUser.setOnAction(event -> {
                 String item = cell.getItem();
                 // code to kick user
-                if (!item.equals(user.getUserName())){
+                if (!item.equals(manager.getUserName())){
                     System.out.println("kick out " + item);
                 }
             });
@@ -70,44 +64,112 @@ public class managerController extends userController {
             });
             return cell ;
         });
+    }
+
+    @Override
+    public void initialize(){
+
+        setUp();
+
+        manager = (Manager) CreateWhiteBoard.getUser();
+
+        // bind variables
+        Bindings.bindContentBidirectional(manager.getMsgList(), msgHistory.getItems());
+        manager.addMsgItem("test only : message"); // now can access msgHistory via msgList
+
+        Bindings.bindContentBidirectional(manager.getUserList(),userList.getItems());
+        manager.addUserItem("Test only : user1");
+
+        Bindings.bindContentBidirectional(manager.getObjectList(),pane.getChildren());
+        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
+        manager.addObjectItem(circleDrawing1);
 
         userList.getItems().add("some test");
         userList.getItems().add("more test");
-
-
-        //set the default stage
-        this.stage = stage;
-
-        // select freehand by default
-        drawMode.getToggles().get(0).setSelected(true);
-
-        // set default color as black
-        colorPicker.setValue(Color.BLACK);
-
-        // prepare shapes for canvas
-        line = new Line();
-        textfield = new TextField();
-        circle = new Circle();
-        rectangle = new Rectangle();
-        path = new Path();
-        polygon = new Polygon();
-
-        textfield.setOnAction(e -> {
-            drawText(textfield.getText());
-        });
-
-        textfield.focusedProperty().addListener((obs, oldVal, newVal) -> {
-            if( newVal == false) {
-                drawText(textfield.getText());
-            }
-        });
-
     }
+
+    @FXML
+    protected void handleNew() {
+        // check is there any unsaved changes
+        if (isUnsaved) {
+            showUnsaveDialog();
+        }
+
+        // clear all changes
+    }
+
+    @FXML
+    protected void handleOpen() {
+        // prepare file chooser
+        FileChooser openfile = new FileChooser();
+        openfile.getExtensionFilters().addAll(
+                new ExtensionFilter("Json Files", "*.json"));
+        openfile.setSelectedExtensionFilter(openfile.getExtensionFilters().get(0));
+        openfile.setTitle("Open File");
+
+        // display the file chooser dialog
+        File file = openfile.showOpenDialog(stage);
+
+        // import whiteboard from a json file
+        if (file != null) {
+            try {
+                // open file reader
+                FileReader reader = new FileReader(file);
+
+                // add shapes to undrawed list
+
+                // close reader
+                reader.close();
+
+            } catch (IOException ex) {
+                System.out.println("Error!");
+            }
+        }
+    }
+
+    @FXML
+    protected void handleSave() {
+
+        // prepare file chooser
+        FileChooser savefile = new FileChooser();
+        savefile.getExtensionFilters().addAll(
+                new ExtensionFilter("Json Files", "*.json"),
+                new ExtensionFilter("All Files", "*.*"));
+        savefile.setSelectedExtensionFilter(savefile.getExtensionFilters().get(0));
+        savefile.setTitle("Save File");
+        savefile.setInitialFileName("untitled-" + LocalDateTime.now().getNano());
+
+        // display the file chooser dialog
+        File file = savefile.showSaveDialog(stage);
+
+        // export whiteboard as a json file
+        if (file != null) {
+            try {
+
+                // open file writer
+                FileWriter fileWriter = new FileWriter(file);
+
+                // add all drawed shapes to file
+//                fileWriter.write(employeeList.toJSONString());
+//                fileWriter.flush();
+
+                // close file writer
+                fileWriter.close();
+
+            } catch (IOException ex) {
+                System.out.println("Error!");
+            }
+        }
+
+        // update save state
+        isUnsaved = false;
+    }
+
     @FXML
     protected void handleSaveAs(ActionEvent event) {
-        // TODO: find a way to access the current stage
-        FileChooser savefile = new FileChooser();
 
+        // prepare file chooser
+        FileChooser savefile = new FileChooser();
         savefile.getExtensionFilters().addAll(
                 new ExtensionFilter("Image Files", "*.png", "*.jpg"),
                 new ExtensionFilter("All Files", "*.*"));
@@ -115,7 +177,10 @@ public class managerController extends userController {
         savefile.setTitle("Save File");
         savefile.setInitialFileName("untitled-" + LocalDateTime.now().getNano());
 
+        // display the file chooser dialog
         File file = savefile.showSaveDialog(stage);
+
+        // export whiteboard as a PNG file
         if (file != null) {
             try {
                 WritableImage writableImage = new WritableImage((int)canvas.getWidth(), (int)canvas.getHeight());
@@ -128,17 +193,33 @@ public class managerController extends userController {
                 System.out.println("Error!");
             }
         }
+
+        // update save state
+        isUnsaved = false;
     }
 
     @Override
     protected void handleQuit(ActionEvent event) {
-        user.sendTerminateMsg();
 
-        super.handleQuit(event);
+        // check is there any unsaved changes
+        if (isUnsaved) {
+            boolean option = showUnsaveDialog();
+            if (option) {
+                manager.sendTerminateMsg();
+                Platform.exit();
+            }
+        } else {
+//            manager.sendTerminateMsg();
+            Platform.exit();
+        }
     }
 
-    // Invoke this message to display a dialog to notify user about unsaved changes
-    protected void showUnsaveDialog() {
+    /**
+     * Invoke this message to display a dialog to notify user about unsaved changes
+     * @return true if changes were saved or user insist on closing the application,
+     *  otherwise return false to indicate user selects "cancel" option
+     */
+    protected boolean showUnsaveDialog() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation Dialog");
         alert.setContentText("There is unsaved changes. Do you want to save them?");
@@ -151,20 +232,25 @@ public class managerController extends userController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == btYes) {
-            // ... user chose "yes
+            // user chose "yes
             handleSaveAs(null);
+            return true;
         } else if (result.get() == btNo) {
-            // ... user chose "No"
-            handleQuit(null);
+            // user chose "no"
+            return true;
         } else {
-            // ... user chose CANCEL or closed the dialog
+            // user chose CANCEL or closed the dialog
+            return false;
         }
     }
 
-    // Invoke this message when a user want to join the whiteboard
+    /**
+     * Invoke this message when a user want to join the whiteboard
+     * @param username - the username of user wants to join
+     */
     protected void showJoinRequest(String username) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Confirmation Dialog");
+        alert.setTitle("Join request");
         alert.setContentText("User: " + username + " want to join your whiteboard. Do you agree?");
 
         ButtonType btYes = new ButtonType("Yes", ButtonBar.ButtonData.YES);
@@ -174,17 +260,28 @@ public class managerController extends userController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == btYes) {
-            // ... user chose "yes
-            user.approveJoinRequest(true);
+            // manager chose "yes
+            manager.approveJoinRequest(true);
         } else {
-            // ... user chose no
-            user.approveJoinRequest(false);
+            // manager chose "no"
+            manager.approveJoinRequest(false);
         }
     }
 
-    // Invoke this message when a manager want to kick out a specified user
+    /**
+     * Invoke this message when a manager want to kick out a specified user
+     * @param username - the username of kicked user
+     */
     protected void KickOutUser(String username) {
-        user.sendKickUserMsg(username);
-        System.out.println("kick out " + user);
+        manager.sendKickUserMsg(username);
+        System.out.println("kick out " + username);
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
     }
 }
+
+
+
+

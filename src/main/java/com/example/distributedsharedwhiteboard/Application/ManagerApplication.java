@@ -13,6 +13,7 @@ public class ManagerApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(ManagerApplication.class.getResource("hello-view_manager.fxml"));
+
         Scene scene = new Scene(fxmlLoader.load());
         scene.getStylesheets().add(Objects.requireNonNull(ManagerApplication.class.getResource("styleSheet.css")).toString());
         Image icon = new Image("icon.png");
@@ -21,6 +22,14 @@ public class ManagerApplication extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+
+        managerController controller = (managerController)fxmlLoader.getController();
+        controller.setStage(stage);
+
+        stage.setOnCloseRequest(e -> {
+            e.consume();
+            controller.handleQuit(null);
+        });
     }
 
     public static void main(String[] args) {

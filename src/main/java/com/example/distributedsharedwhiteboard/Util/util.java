@@ -1,7 +1,7 @@
 package com.example.distributedsharedwhiteboard.Util;
 
 import com.example.distributedsharedwhiteboard.Logger;
-import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.message.ErrorMsg;
 import com.example.distributedsharedwhiteboard.message.Message;
 import com.example.distributedsharedwhiteboard.message.MessageFactory;
@@ -55,17 +55,17 @@ public class util {
         return msgFromServer;
     }
 
-    public static String TransferFromShape(Shape shape) {
-        String jsonShape = shape.toString();
+    public static String TransferFromShape(ShapeDrawing shapeDrawing) {
+        String jsonShape = shapeDrawing.toString();
         utilLogger.logDebug("Transferring from Shape to Json: "+ jsonShape);
         return jsonShape;
     };
 
-    static public Shape TransferToShape(String jsonShape) throws JsonSerializationException, IOException {
+    static public ShapeDrawing TransferToShape(String jsonShape) throws JsonSerializationException, IOException {
         if(jsonShape!=null) {
-            Shape shape = (Shape) MessageFactory.deserialize(jsonShape);
-            utilLogger.logDebug("Transferring from Json to Shape: "+ shape.toString());
-            return shape;
+            ShapeDrawing shapeDrawing = (ShapeDrawing) MessageFactory.deserialize(jsonShape);
+            utilLogger.logDebug("Transferring from Json to Shape: "+ shapeDrawing.toString());
+            return shapeDrawing;
         } else {
             utilLogger.logDebug("The jsonShape is empty.");
             throw new IOException();

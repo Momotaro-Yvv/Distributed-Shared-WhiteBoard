@@ -1,6 +1,6 @@
 package com.example.distributedsharedwhiteboard.Application;
 
-import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -70,29 +70,29 @@ public class User {
     }
     //Setters
 
-    public void addObjectItem(Shape shape) {
-        switch( shape.getClass().getName()){
-            case "Circle":
-                Node circle = new Circle();
-                this.objectList.add(circle);
-                break;
-            case "Line":
-                Node line = new Line();
-                this.objectList.add(line);
-                break;
-            case "Path":
-                Node path = new Path();
-                this.objectList.add(path);
-                break;
-            case "Text":
-                Node text = new Text();
-                this.objectList.add(text);
-                break;
-            case "Triangle":
-                Node triangle = new Polygon();
-                this.objectList.add(triangle);
-                break;
-        };
+    public void addObjectItem(ShapeDrawing shapeDrawing) {
+//        switch( shapeDrawing.getClass().getName()){
+//            case "Circle":
+//                Node circle = new Circle();
+//                this.objectList.add(circle);
+//                break;
+//            case "Line":
+//                Node line = new Line();
+//                this.objectList.add(line);
+//                break;
+//            case "Path":
+//                Node path = new Path();
+//                this.objectList.add(path);
+//                break;
+//            case "Text":
+//                Node text = new Text();
+//                this.objectList.add(text);
+//                break;
+//            case "Triangle":
+//                Node triangle = new Polygon();
+//                this.objectList.add(triangle);
+//                break;
+//        };
 
     }
 

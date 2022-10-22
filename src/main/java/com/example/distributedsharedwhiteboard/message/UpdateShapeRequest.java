@@ -1,6 +1,6 @@
 package com.example.distributedsharedwhiteboard.message;
 
-import com.example.distributedsharedwhiteboard.Shape.Shape;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonElement;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
 
@@ -17,8 +17,8 @@ public class UpdateShapeRequest extends Message{
 
     public UpdateShapeRequest(){}
 
-    public UpdateShapeRequest(Shape shape){
-        this.shape = TransferFromShape(shape);
+    public UpdateShapeRequest(ShapeDrawing shapeDrawing){
+        this.shape = TransferFromShape(shapeDrawing);
     }
 
 }
