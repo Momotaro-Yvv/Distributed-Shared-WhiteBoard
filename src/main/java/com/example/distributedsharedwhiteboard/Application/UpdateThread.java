@@ -4,9 +4,10 @@ import com.example.distributedsharedwhiteboard.Logger;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.ApproveRequest;
 import com.example.distributedsharedwhiteboard.message.ErrorMsg;
-import com.example.distributedsharedwhiteboard.message.Message;
+import com.example.distributedsharedwhiteboard.message.*;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.BasicPermission;
@@ -17,23 +18,40 @@ import static com.example.distributedsharedwhiteboard.Util.util.readMsg;
 import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 public class UpdateThread extends Thread {
-    private LinkedBlockingDeque<Socket> incomingConnections;
     private Logger logger;
+    private BufferedReader bufferedReader;
+    private BufferedWriter bufferedWriter;
 
-    public UpdateThread(LinkedBlockingDeque<Socket> incomingConnections, Logger logger) {
-        this.incomingConnections = incomingConnections;
+    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger) {
         this.logger = logger;
+        this.bufferedReader = bufferedReader;
+        this.bufferedWriter = bufferedWriter;
     }
 
     @Override
     public void run() {
         while (!isInterrupted()) {
             try {
-                Socket socket = incomingConnections.take();
-                processUpdate(socket);
-            } catch (InterruptedException e) {
-                logger.logWarn("Update Thread got interrupted.");
-                throw new RuntimeException(e);
+                Message msgFromSvr = readMsg(bufferedReader);
+
+                if (!msgFromSvr.getClass().getName().equals(ApproveRequest.class.getName())){
+                    ApproveRequest approveRequest = (ApproveRequest) msgFromSvr;
+                    String userJoining = approveRequest.username;
+                    System.out.println("ApproveRequest: " + userJoining + " want to join ");
+                    writeMsg(bufferedWriter,new ApproveReply(true));
+                }
+
+            } catch (JsonSerializationException e1) {
+
+                try {
+                    writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+//                logger.logWarn("Invalid message");
+                return;
+            } catch (IOException e) {
+//                logger.logWarn("Something went wrong with the connection.");
             }
         }
     }
@@ -58,9 +76,9 @@ public class UpdateThread extends Thread {
                 if (!messageFromServer.getClass().getName().equals(ApproveRequest.class.getName())){
                     ApproveRequest approveRequest = (ApproveRequest) messageFromServer;
                     String userJoining = approveRequest.username;
-                    Boolean approve = showJoinRequest(userJoining);
+//                    Boolean approve = showJoinRequest(userJoining);
                     
-                    writeMsg(bufferedWriter, new ApproveRequest(approve));
+//                    writeMsg(bufferedWriter, new ApproveRequest(approve));
                 }
             }
         } catch (IOException e) {

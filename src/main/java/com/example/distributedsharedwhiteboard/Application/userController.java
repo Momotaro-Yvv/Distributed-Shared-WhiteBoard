@@ -163,8 +163,6 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional( user.getObjectList(),drawedShapes);
-
         drawedShapes.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
