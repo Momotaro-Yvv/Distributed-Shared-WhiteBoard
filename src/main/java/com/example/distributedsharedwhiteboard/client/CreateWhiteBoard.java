@@ -83,7 +83,7 @@ public class CreateWhiteBoard {
             if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
                 CreateReply createReply = (CreateReply) msgFromServer;
                 if (createReply.success){
-                    manager = new Manager(username,socket);
+                    manager = new Manager(username, socket);
 
                     System.out.println("Username: " + username);
                     System.out.println("Socket: " + socket);
@@ -98,6 +98,7 @@ public class CreateWhiteBoard {
 
         } catch (IOException e) {
             System.out.println("Client received IO exception on socket.");
+            e.printStackTrace();
             System.exit(1);
         }
     }

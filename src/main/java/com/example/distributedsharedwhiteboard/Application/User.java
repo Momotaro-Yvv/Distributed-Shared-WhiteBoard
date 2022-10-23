@@ -9,6 +9,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -34,9 +35,12 @@ public class User {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
 
-    private LinkedBlockingDeque<Socket> incomingConnections;
-
+    private ServerSocket serverSocket;
     private UpdateThread updateThread;
+
+//    protected Queue<ShapeDrawing> undrawedShapes;
+//    protected Queue<ShapeDrawing> unShapes;
+
     //Constructors
     public User(String username, Socket socket) throws IOException {
         this.userName = new SimpleStringProperty(username) ;
@@ -51,7 +55,7 @@ public class User {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
 
-        updateThread= new UpdateThread(incomingConnections,userList,logger);
+        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger);
         updateThread.start();
     };
 
@@ -216,7 +220,7 @@ public class User {
 
         if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
             QuitReply quitReply =  (QuitReply) msgFromSvr;
-            updateThread.interrupt();
+//            updateThread.interrupt();
             return quitReply.success;
         }
         return false;
