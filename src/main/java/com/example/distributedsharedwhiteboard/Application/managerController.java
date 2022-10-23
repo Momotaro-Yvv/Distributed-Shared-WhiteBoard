@@ -5,8 +5,11 @@ import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
 import com.example.distributedsharedwhiteboard.Util.*;
 
+import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -54,6 +57,7 @@ public class managerController extends userController {
                 // code to kick user
                 if (!item.equals(manager.getUserName())){
                     System.out.println("kick out " + item);
+                    manager.sendKickUserMsg(item);
                 }
             });
             contextMenu.getItems().add(kickOutUser);
@@ -73,10 +77,10 @@ public class managerController extends userController {
 
     @Override
     public void initialize(){
+        manager = CreateWhiteBoard.getManager();
+        System.out.println("Manager set up!");
 
         setUp();
-
-        manager = CreateWhiteBoard.getManager();
 
         // bind variables
         Bindings.bindContentBidirectional(manager.getMsgList(), msgHistory.getItems());
@@ -85,12 +89,26 @@ public class managerController extends userController {
         Bindings.bindContentBidirectional(manager.getUserList(),userList.getItems());
         manager.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional(manager.getObjectList(),pane.getChildren());
-//        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
-//        manager.addObjectItem(circleDrawing1);
+        Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
 
-        userList.getItems().add("some test");
-        userList.getItems().add("more test");
+        drawedShapes.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            // ask user to send a updateRequest to server
+                            ShapeDrawing shape = (ShapeDrawing) s;
+                            manager.sendDrawMsg(shape);
+                        }
+                    }
+                }
+            }
+
+        });
     }
 
     @FXML
@@ -107,6 +125,7 @@ public class managerController extends userController {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // TODO: send reload request to server
+        manager.sendReloadRequest();
     }
 
     @FXML
@@ -269,6 +288,7 @@ public class managerController extends userController {
     }
 
     /**
+     * // TODO: when received an ApproveRequest from server
      * Invoke this message when a user want to join the whiteboard
      * @param username - the username of user wants to join
      */

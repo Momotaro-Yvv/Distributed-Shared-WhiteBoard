@@ -1,37 +1,52 @@
 package com.example.distributedsharedwhiteboard.Application;
 
+import com.example.distributedsharedwhiteboard.Logger;
 import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
+import com.example.distributedsharedwhiteboard.message.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static com.example.distributedsharedwhiteboard.Util.util.TransferToShape;
+import static com.example.distributedsharedwhiteboard.Util.util.*;
 
 public class User {
     private Boolean isManager = false;
     private SimpleStringProperty userName;
 
+    private Logger logger;
+
 //    bidirectionalList
-
     private ObservableList<ShapeDrawing> objectList;
-
     private ObservableList<String> msgList;
-
-    // user list
     private ObservableList<String> userList;
 
+    // Connection
+    private Socket socket;
+    private InputStream inputStream;
+    private OutputStream outputStream;
+    private BufferedReader bufferedReader;
+    private BufferedWriter bufferedWriter;
 
     //Constructors
-    public User(String username){
+    public User(String username, Socket socket) throws IOException {
         this.userName = new SimpleStringProperty(username) ;
         this.objectList = FXCollections.observableArrayList();
         this.msgList = FXCollections.observableArrayList();
         this.userList = FXCollections.observableArrayList();
         this.userList.add(username);
+
+        this.socket = socket;
+        this.inputStream = socket.getInputStream();
+        this.outputStream = socket.getOutputStream();
+        this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+
     };
 
     //Getters
@@ -59,7 +74,16 @@ public class User {
     public SimpleStringProperty userNameProperty() {
         return userName;
     }
-    //Setters
+
+
+    public void addMsgItem(String item) {
+        this.msgList.add(item);
+    }
+
+    public void addUserItem(String item) {
+        this.userList.add(item);
+    }
+
 
     public void addObjectItem(ShapeDrawing shapeDrawing) {
 //        switch( shapeDrawing.getClass().getName()){
@@ -87,14 +111,6 @@ public class User {
 
     }
 
-    public void addMsgItem(String item) {
-        this.msgList.add(item);
-    }
-
-    public void addUserItem(String item) {
-        this.userList.add(item);
-    }
-
     //Setters
 
     public void setObjectList(String[] objectList) throws JsonSerializationException, IOException {
@@ -117,8 +133,85 @@ public class User {
 
     //Methods
 
-    protected void sendDrawMsg(){};
-    protected void sendChatMsg(){};
+    protected Boolean sendDrawMsg(ShapeDrawing shape) {
+        try {
+            writeMsg(bufferedWriter, new DrawRequest(userName.getName(), shape));
+        } catch (IOException e) {
+            logger.logError("Failed to send DrawRequest...");
+            throw new RuntimeException(e);
+        }
 
-    protected void sendQuitMsg(){};
+        Message msgFromSvr;
+        try {
+            msgFromSvr = readMsg(bufferedReader);
+        } catch (JsonSerializationException | IOException e1) {
+            try {
+                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
+            } catch (IOException e) {
+                logger.logDebug("Error happened when receiving DrawReply from server");
+                throw new RuntimeException(e);
+            }
+            return false;
+        }
+
+        if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
+            DrawReply drawReply =  (DrawReply) msgFromSvr;
+            return drawReply.success;
+        }
+        return false;
+    }
+
+    protected Boolean sendChatMsg(String msg){
+        try {
+            writeMsg(bufferedWriter, new SendMsgReuqest(userName.getName(), msg));
+        } catch (IOException e) {
+            logger.logError("Failed to send SendMsgRequest...");
+            throw new RuntimeException(e);
+        }
+        Message msgFromSvr;
+        try {
+            msgFromSvr = readMsg(bufferedReader);
+        } catch (JsonSerializationException | IOException e1) {
+            try {
+                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
+            } catch (IOException e) {
+                logger.logDebug("Error happened when receiving SendMsgReply from server");
+                throw new RuntimeException(e);
+            }
+            return false;
+        }
+
+        if (msgFromSvr.getClass().getName() == SendMsgReply.class.getName()) {
+            SendMsgReply sendMsgReply =  (SendMsgReply) msgFromSvr;
+            return sendMsgReply.success;
+        }
+        return false;
+    };
+
+    protected Boolean sendQuitMsg(){
+        try {
+            writeMsg(bufferedWriter, new QuitRequest(userName.getName()));
+        } catch (IOException e) {
+            logger.logError("Failed to send QuitRequest...");
+            throw new RuntimeException(e);
+        }
+        Message msgFromSvr;
+        try {
+            msgFromSvr = readMsg(bufferedReader);
+        } catch (JsonSerializationException | IOException e1) {
+            try {
+                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
+            } catch (IOException e) {
+                logger.logDebug("Error happened when receiving SendMsgReply from server");
+                throw new RuntimeException(e);
+            }
+            return false;
+        }
+
+        if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
+            QuitReply quitReply =  (QuitReply) msgFromSvr;
+            return quitReply.success;
+        }
+        return false;
+    };
 }
