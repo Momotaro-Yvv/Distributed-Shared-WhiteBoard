@@ -195,20 +195,17 @@ public class userController {
 
             // add msg to message history
             msgHistory.getItems().add("Me: " + input);
-            if (user.sendChatMsg(input)){
-                // clear input
-                msg.clear();
-            }
+            user.sendChatMsg(input);
+            // clear input
+            msg.clear();
         }
     }
 
     @FXML
     protected void handleQuit(ActionEvent event) {
 
-        Boolean success = user.sendQuitMsg();
-        if (success){
-            Platform.exit();
-        }
+        user.sendQuitMsg();
+        Platform.exit();
     }
 
     @FXML

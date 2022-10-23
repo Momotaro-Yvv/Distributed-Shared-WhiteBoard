@@ -54,7 +54,7 @@ public class User {
         this.outputStream = socket.getOutputStream();
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-
+        this.logger = new Logger();
         updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger);
         updateThread.start();
     };
@@ -143,86 +143,31 @@ public class User {
 
     //Methods
 
-    protected Boolean sendDrawMsg(ShapeDrawing shape) {
+    protected void sendDrawMsg(ShapeDrawing shape) {
         try {
             writeMsg(bufferedWriter, new DrawRequest(userName.getName(), shape));
         } catch (IOException e) {
             logger.logError("Failed to send DrawRequest...");
             throw new RuntimeException(e);
         }
-
-        Message msgFromSvr;
-        try {
-            msgFromSvr = readMsg(bufferedReader);
-        } catch (JsonSerializationException | IOException e1) {
-            try {
-                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
-            } catch (IOException e) {
-                logger.logDebug("Error happened when receiving DrawReply from server");
-                throw new RuntimeException(e);
-            }
-            return false;
-        }
-
-        if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
-            DrawReply drawReply =  (DrawReply) msgFromSvr;
-            return drawReply.success;
-        }
-        return false;
     }
 
-    protected Boolean sendChatMsg(String msg){
+
+    protected void sendChatMsg(String msg){
         try {
             writeMsg(bufferedWriter, new SendMsgReuqest(userName.getName(), msg));
         } catch (IOException e) {
             logger.logError("Failed to send SendMsgRequest...");
             throw new RuntimeException(e);
         }
-        Message msgFromSvr;
-        try {
-            msgFromSvr = readMsg(bufferedReader);
-        } catch (JsonSerializationException | IOException e1) {
-            try {
-                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
-            } catch (IOException e) {
-                logger.logDebug("Error happened when receiving SendMsgReply from server");
-                throw new RuntimeException(e);
-            }
-            return false;
-        }
-
-        if (msgFromSvr.getClass().getName() == SendMsgReply.class.getName()) {
-            SendMsgReply sendMsgReply =  (SendMsgReply) msgFromSvr;
-            return sendMsgReply.success;
-        }
-        return false;
     };
 
-    protected Boolean sendQuitMsg(){
+    protected void sendQuitMsg(){
         try {
             writeMsg(bufferedWriter, new QuitRequest(userName.getName()));
         } catch (IOException e) {
             logger.logError("Failed to send QuitRequest...");
             throw new RuntimeException(e);
         }
-        Message msgFromSvr;
-        try {
-            msgFromSvr = readMsg(bufferedReader);
-        } catch (JsonSerializationException | IOException e1) {
-            try {
-                writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
-            } catch (IOException e) {
-                logger.logDebug("Error happened when receiving SendMsgReply from server");
-                throw new RuntimeException(e);
-            }
-            return false;
-        }
-
-        if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
-            QuitReply quitReply =  (QuitReply) msgFromSvr;
-//            updateThread.interrupt();
-            return quitReply.success;
-        }
-        return false;
     };
 }

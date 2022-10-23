@@ -34,24 +34,30 @@ public class UpdateThread extends Thread {
             try {
                 Message msgFromSvr = readMsg(bufferedReader);
 
-                if (!msgFromSvr.getClass().getName().equals(ApproveRequest.class.getName())){
+                if (msgFromSvr.getClass().getName() == ApproveRequest.class.getName()) {
                     ApproveRequest approveRequest = (ApproveRequest) msgFromSvr;
                     String userJoining = approveRequest.username;
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
-                    writeMsg(bufferedWriter,new ApproveReply(true));
+                    writeMsg(bufferedWriter, new ApproveReply(true, userJoining, approveRequest.clientIp, approveRequest.clientPort));
+                } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
+                    DrawReply drawReply = (DrawReply) msgFromSvr;
+                    logger.logDebug(drawReply.toString());
+                } else if (msgFromSvr.getClass().getName() == SendMsgReply.class.getName()) {
+                    SendMsgReply sendMsgReply = (SendMsgReply) msgFromSvr;
+                    Boolean success = sendMsgReply.success;
+                    logger.logDebug(sendMsgReply.toString());
+                } else if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
+                    QuitReply quitReply = (QuitReply) msgFromSvr;
+                    if (quitReply.success){
+                        break;
+                    }
+                } else {
+                    logger.logDebug(msgFromSvr.toString());
                 }
-
-            } catch (JsonSerializationException e1) {
-
-                try {
-                    writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-//                logger.logWarn("Invalid message");
-                return;
+            } catch (JsonSerializationException e) {
+                throw new RuntimeException(e);
             } catch (IOException e) {
-//                logger.logWarn("Something went wrong with the connection.");
+                throw new RuntimeException(e);
             }
         }
     }

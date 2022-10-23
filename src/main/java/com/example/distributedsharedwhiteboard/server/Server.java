@@ -118,13 +118,14 @@ public class Server {
 
                         // get a message
                         Message msg;
+                        svrLogger.logDebug("------------11--------------");
                         try {
                             msg = util.readMsg(bufferedReader);
                         } catch (JsonSerializationException e1) {
                             util.writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
                             return;
                         };
-
+                        svrLogger.logDebug("------------22--------------");
                         // process the request message
                         handleCommand(bufferedWriter,bufferedReader, msg);
                     }
@@ -199,71 +200,26 @@ public class Server {
     }
 
     /**
-     * This function will deal with users' initial Join WB request,
-     * If the WB hasn't had the manager then the handleCreateRequest will be transparently called,
-     * otherwise this user will be added to existed userList
-     * @return false if failed to parse command, otherwise true and send JoinReply
+     * This function will deal with users' initial Join WB request
+     * By sending join request to manager for approving
      */
     private static boolean handleJoinRequest
         (BufferedWriter bufferedWriter,BufferedReader bufferedReader, JoinRequest msg,Socket clientSocket) throws IOException {
         svrLogger.logDebug("Client want to join a White Board");
         String userName = msg.username;
 
-        //Send ApproveRequest to Manager asking for approvement
-        //TODO: Could send to manager's socket somehow
-        BufferedWriter bw;
+        //Send ApproveRequest to Manager asking for approve
         try{
             svrLogger.logDebug("Manager's socket is : " + userList.getManagerSocket());
             DataOutputStream out = new DataOutputStream(userList.getManagerSocket().getOutputStream());
-            bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-        } catch (NullPointerException | IOException e){
-            try {
-                writeMsg(bufferedWriter, new ErrorMsg("There is no manager yet. Please try again later."));
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+            writeMsg(bw, new ApproveRequest(userName, clientSocket));
+            return true;
+        } catch (NullPointerException e){
+            writeMsg(bufferedWriter, new ErrorMsg("There is no manager yet. Please try again later."));
             return false;
         }
 
-        try{
-            writeMsg(bw, new ApproveRequest(userName));
-        } catch (IOException e){
-            svrLogger.logError("Failed to send ApproveRequest...");
-        }
-
-        // get a message
-        Message msgFromManager;
-        try {
-            msgFromManager = util.readMsg(bufferedReader);
-        } catch (JsonSerializationException | IOException e1) {
-            writeMsg(bw, new ErrorMsg("Invalid message, expecting ApproveReply..."));
-            return false;
-        }
-
-        Boolean approve = false;
-        if (msgFromManager.getClass().getName() == ApproveReply.class.getName()){
-            ApproveReply approveReply = (ApproveReply)msgFromManager;
-            approve = approveReply.approve;
-        }
-        if (approve){
-            if (userList.getListSize() > 0) {
-                Boolean success = userList.addAUser(userName,clientSocket);
-                if (success) {
-                    svrLogger.logDebug("A new user:"+ userName + " has been added");
-                    writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
-                    return true;
-                } else {
-                    writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
-                    return false;
-                }
-            } else{
-                String error = "The White board does not owned by a manager yet, You can create a White board instead";
-                writeMsg(bufferedWriter, new ErrorMsg(error));
-                return false;
-            }
-        } else {
-            return false;
-        }
     }
 
 
@@ -341,10 +297,30 @@ public class Server {
                 }else {
                     util.writeMsg(bufferedWriter, new ErrorMsg("Something went wrong reloading the file"));
                 }
-
+                break;
+            case "com.example.distributedsharedwhiteboard.message.ApproveReply":
+                ApproveReply approveReply = (ApproveReply) message;
+                svrLogger.logDebug("Received approve reply from manager!");
+                Boolean approve = approveReply.approve;
+                if (approve){
+                        String userJoining = approveReply.username;
+                        // TODO: Something wrong here...
+                        // TODO: Already get clientIp and clientPort from approveReply, how to put them together? I need the original clientSocket to send back JoinReply
+                        Socket userSocket = new Socket(approveReply.clientIp, approveReply.clientPort);
+                        svrLogger.logDebug("userSocket:" + userSocket);
+                        Boolean successAddUser= userList.addAUser(userJoining,userSocket);
+                        if (successAddUser) {
+                            svrLogger.logDebug("A new user:"+ approveReply.username + " has been added");
+                            writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
+                        } else {
+                            writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
+                        }
+                } else {
+                    writeMsg(bufferedWriter, new ErrorMsg("Manager not approve your join..."));
+                }
                 break;
             default:
-                writeMsg(bufferedWriter,new ErrorMsg("Expecting a request message"));
+                writeMsg(bufferedWriter,new ErrorMsg("handleCommand: Expecting a request message"));
 
         }
     }
