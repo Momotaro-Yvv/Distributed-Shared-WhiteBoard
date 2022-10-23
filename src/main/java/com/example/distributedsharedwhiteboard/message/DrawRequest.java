@@ -18,7 +18,7 @@ public class DrawRequest extends Message{
     public String username;
     public DrawRequest(){};
 
-    public DrawRequest(ShapeDrawing shapeDrawing, String username){
+    public DrawRequest(String username,ShapeDrawing shapeDrawing){
         this.shape = TransferFromShape(shapeDrawing);
         this.username = username;
     };

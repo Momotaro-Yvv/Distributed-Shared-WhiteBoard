@@ -83,7 +83,9 @@ public class Server {
             try(Socket clientSocket = client) {
                 String clientIp = client.getInetAddress().getHostAddress();
                 int clientPort = client.getPort();
-                svrLogger.logDebug("Under new server thread, received Client request from " + clientIp + ":" + clientPort);
+                svrLogger.logDebug
+                        (" --------------------------  Under new server thread--------------------------------\n" +
+                                "Received Client request from " + clientIp + " : " + clientPort + " " + client);
 
                 DataInputStream input = new DataInputStream(clientSocket.getInputStream());
                 DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
@@ -101,9 +103,9 @@ public class Server {
 
                 Boolean success;
                 if (msgFromClient.getClass().getName() == CreateRequest.class.getName()){
-                    success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, clientSocket);
+                    success = handleCreateRequest(bufferedWriter, (CreateRequest)msgFromClient, client);
                 } else if (msgFromClient.getClass().getName() == JoinRequest.class.getName()) {
-                    success = handleJoinRequest(bufferedWriter, bufferedReader, (JoinRequest) msgFromClient, clientSocket);
+                    success = handleJoinRequest(bufferedWriter, bufferedReader, (JoinRequest) msgFromClient, client);
                 } else {
                     writeMsg(bufferedWriter,new ErrorMsg("Expecting JoinRequest or CreateRequest"));
                     return;
@@ -127,8 +129,12 @@ public class Server {
                         handleCommand(bufferedWriter,bufferedReader, msg);
                     }
                 }
-            } catch (IOException | JsonSerializationException e) {
-                svrLogger.logError("Encounter Json Serialization Exception. Invalid message, please try again.");
+            } catch (IOException e) {
+                svrLogger.logError("Encounter IOException");
+                throw new IOException(e);
+            } catch (JsonSerializationException e) {
+                svrLogger.logError("Encounter Json Serialization Exception.");
+                throw new RuntimeException(e);
             }
 
         } catch(IOException e){
@@ -198,22 +204,39 @@ public class Server {
      * otherwise this user will be added to existed userList
      * @return false if failed to parse command, otherwise true and send JoinReply
      */
-    private static boolean handleJoinRequest(BufferedWriter bufferedWriter,BufferedReader bufferedReader, JoinRequest msg,Socket clientSocket)
-            throws IOException {
+    private static boolean handleJoinRequest
+        (BufferedWriter bufferedWriter,BufferedReader bufferedReader, JoinRequest msg,Socket clientSocket) throws IOException {
         svrLogger.logDebug("Client want to join a White Board");
         String userName = msg.username;
 
         //Send ApproveRequest to Manager asking for approvement
-        DataOutputStream out = new DataOutputStream(userList.getManagerSocket().getOutputStream());
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
-        writeMsg(bw, new ApproveRequest(userName));
+        //TODO: Could send to manager's socket somehow
+        BufferedWriter bw;
+        try{
+            svrLogger.logDebug("Manager's socket is : " + userList.getManagerSocket());
+            DataOutputStream out = new DataOutputStream(userList.getManagerSocket().getOutputStream());
+            bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+        } catch (NullPointerException | IOException e){
+            try {
+                writeMsg(bufferedWriter, new ErrorMsg("There is no manager yet. Please try again later."));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            return false;
+        }
+
+        try{
+            writeMsg(bw, new ApproveRequest(userName));
+        } catch (IOException e){
+            svrLogger.logError("Failed to send ApproveRequest...");
+        }
 
         // get a message
         Message msgFromManager;
         try {
             msgFromManager = util.readMsg(bufferedReader);
-        } catch (JsonSerializationException e1) {
-            writeMsg(bufferedWriter, new ErrorMsg("Invalid message"));
+        } catch (JsonSerializationException | IOException e1) {
+            writeMsg(bw, new ErrorMsg("Invalid message, expecting ApproveReply..."));
             return false;
         }
 

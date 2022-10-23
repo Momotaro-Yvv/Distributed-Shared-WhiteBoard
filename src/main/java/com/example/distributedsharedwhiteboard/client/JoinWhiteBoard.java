@@ -89,11 +89,15 @@ public class JoinWhiteBoard {
                 if (joinReply.success){
                     String[] userList = joinReply.userList;
                     String[] objectList =joinReply.objectList;
-                    user = new User(username);
+                    user = new User(username, socket);
                     user.setUserList(userList);
 
                     user.setUserList(userList);
                     user.setObjectList(objectList);
+
+                    System.out.println("Username: " + username);
+                    System.out.println("Socket: " + socket);
+
                     Application.launch(UserApplication.class);
                 }
             } else {

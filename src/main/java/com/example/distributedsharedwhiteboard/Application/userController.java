@@ -100,26 +100,8 @@ public class userController {
      * fxml elements are working properly.
      */
     protected void setUp() {
-
         // prepare shape list
         drawedShapes = FXCollections.observableArrayList();
-        drawedShapes.addListener(new ListChangeListener() {
-            @Override
-            public void onChanged(ListChangeListener.Change c) {
-
-                while (c.next()) {
-
-                    // if anything was added to list
-                    if (c.wasAdded()) {
-                        for (Object s : c.getAddedSubList()) {
-                            // ask user to send a updateRequest to server
-                            ShapeDrawing shape = (ShapeDrawing) o;
-                        }
-                    }
-                }
-            }
-
-        });
 
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
@@ -168,11 +150,12 @@ public class userController {
      * which means all fxml elements have been successfully loaded.
      */
     public void initialize() {
+        user = JoinWhiteBoard.getUser();
+        System.out.println("User set up!");
 
         // set up default settings
         setUp();
 
-        user = JoinWhiteBoard.getUser();
         // bind variables
         Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
         user.addMsgItem("test only : message"); // now can access msgHistory via msgList
@@ -180,9 +163,26 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        Bindings.bindContentBidirectional( user.getObjectList(), pane.getChildren());
-//        CircleDrawing circleDrawing1 = new CircleDrawing(1, 1, 1);
-//        user.addObjectItem(circleDrawing1);
+        Bindings.bindContentBidirectional( user.getObjectList(),drawedShapes);
+
+        drawedShapes.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            // ask user to send a updateRequest to server
+                            ShapeDrawing shape = (ShapeDrawing) s;
+                            user.sendDrawMsg(shape);
+                        }
+                    }
+                }
+            }
+
+        });
     }
 
     @FXML
@@ -195,21 +195,22 @@ public class userController {
         // check if text is empty
         if (input != null && input.length() != 0) {
 
-            System.out.println(input);
-
             // add msg to message history
-            msgHistory.getItems().add("user54686: " + input);
-
-            // clear input
-            msg.clear();
+            msgHistory.getItems().add("Me: " + input);
+            if (user.sendChatMsg(input)){
+                // clear input
+                msg.clear();
+            }
         }
     }
 
     @FXML
     protected void handleQuit(ActionEvent event) {
 
-        user.sendQuitMsg();
-        Platform.exit();
+        Boolean success = user.sendQuitMsg();
+        if (success){
+            Platform.exit();
+        }
     }
 
     @FXML

@@ -83,7 +83,11 @@ public class CreateWhiteBoard {
             if (msgFromServer.getClass().getName() == CreateReply.class.getName()) {
                 CreateReply createReply = (CreateReply) msgFromServer;
                 if (createReply.success){
-                    manager = new Manager(username);
+                    manager = new Manager(username,socket);
+
+                    System.out.println("Username: " + username);
+                    System.out.println("Socket: " + socket);
+
                     Application.launch(ManagerApplication.class);
                 }
             } else {
