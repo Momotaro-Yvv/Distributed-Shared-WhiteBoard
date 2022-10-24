@@ -194,6 +194,31 @@ public class userController {
             }
 
         });
+
+        todoCmds.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            ControllerCmd cmd = (ControllerCmd) s;
+                            switch (cmd.cmd) {
+                                case "showInfoDialog":
+                                    showInfoDialog(cmd.param);
+                                    break;
+                                case "handleQuit":
+                                    handleQuit(null);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+        });
     }
 
     @FXML

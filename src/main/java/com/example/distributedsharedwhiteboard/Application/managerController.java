@@ -127,6 +127,9 @@ public class managerController extends userController {
                         for (Object s : c.getAddedSubList()) {
                             ControllerCmd cmd = (ControllerCmd) s;
                             switch (cmd.cmd) {
+                                case "showInfoDialog":
+                                    showInfoDialog(cmd.param);
+                                    break;
                                 case "showJoinRequest":
                                     showJoinRequest(cmd.param);
                                     break;

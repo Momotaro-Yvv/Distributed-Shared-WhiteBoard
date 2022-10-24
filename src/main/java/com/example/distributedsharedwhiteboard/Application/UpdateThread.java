@@ -123,6 +123,12 @@ public class UpdateThread extends Thread {
                             userList.add(newUserName);
                         });
                     }
+                } else if (msgFromSvr.getClass().getName() == Goodbye.class.getName()){
+                    Goodbye goodbye = (Goodbye) msgFromSvr;
+
+                    Platform.runLater(() -> {
+                        eventList.add(new ControllerCmd("showInfoDialog", goodbye.goodbye));
+                    });
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }
