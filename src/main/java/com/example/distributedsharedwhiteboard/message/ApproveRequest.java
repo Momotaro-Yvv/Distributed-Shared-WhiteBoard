@@ -14,17 +14,11 @@ public class ApproveRequest extends Message{
 
     @JsonElement
     public String username;
-    @JsonElement
-    public String clientIp;
-    @JsonElement
-    public Integer clientPort;
 
     public ApproveRequest(){};
 
 
-    public ApproveRequest(String username, Socket socket) {
+    public ApproveRequest(String username) {
         this.username = username;
-        this.clientIp = socket.getInetAddress().getHostAddress();
-        this.clientPort = socket.getPort();
     }
 }

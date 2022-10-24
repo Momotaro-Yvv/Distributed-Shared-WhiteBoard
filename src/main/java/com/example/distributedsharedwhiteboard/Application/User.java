@@ -12,8 +12,6 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
 
 import static com.example.distributedsharedwhiteboard.Util.util.*;
 
@@ -55,7 +53,7 @@ public class User {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.logger = new Logger();
-        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger, eventList);
+        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger);
         updateThread.start();
     };
 
@@ -158,7 +156,7 @@ public class User {
 
     protected void sendChatMsg(String msg){
         try {
-            writeMsg(bufferedWriter, new SendMsgReuqest(userName.getName(), msg));
+            writeMsg(bufferedWriter, new SendMsgRequest(userName.getName(), msg));
         } catch (IOException e) {
             logger.logError("Failed to send SendMsgRequest...");
             throw new RuntimeException(e);

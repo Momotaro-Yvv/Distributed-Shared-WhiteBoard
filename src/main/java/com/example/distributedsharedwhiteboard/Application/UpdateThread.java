@@ -31,6 +31,7 @@ public class UpdateThread extends Thread {
     @Override
     public void run() {
         while (!isInterrupted()) {
+
             try {
                 Message msgFromSvr = readMsg(bufferedReader);
 
@@ -38,7 +39,7 @@ public class UpdateThread extends Thread {
                     ApproveRequest approveRequest = (ApproveRequest) msgFromSvr;
                     String userJoining = approveRequest.username;
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
-                    writeMsg(bufferedWriter, new ApproveReply(true, userJoining, approveRequest.clientIp, approveRequest.clientPort));
+                    writeMsg(bufferedWriter, new ApproveReply(true, userJoining));
                 } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;
                     logger.logDebug(drawReply.toString());
@@ -48,50 +49,24 @@ public class UpdateThread extends Thread {
                     logger.logDebug(sendMsgReply.toString());
                 } else if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
                     QuitReply quitReply = (QuitReply) msgFromSvr;
-                    if (quitReply.success){
+                    if (quitReply.success) {
                         break;
                     }
+                } else if (msgFromSvr.getClass().getName() == UpdateMsgRequest.class.getName()) {
+                    // add msg to GUI chat window
+                } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
+                    
+                } else if (msgFromSvr.getClass().getName() == UpdateShapeRequest.class.getName()) {
+
+                } else if (msgFromSvr.getClass().getName() == UpdateUserlistRequest.class.getName()){
+
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }
-            } catch (JsonSerializationException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
+            } catch (JsonSerializationException | IOException e) {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    private void processUpdate(Socket socket){
-        InputStream inputStream = null;
-        try {
-            inputStream = socket.getInputStream();
-            OutputStream outputStream = socket.getOutputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-
-            // keep the channel up for communication with server
-            while (true){
-                Message messageFromServer;
-                try {
-                    messageFromServer = readMsg(bufferedReader);
-                } catch (JsonSerializationException e1) {
-                    writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
-                    return;
-                }
-                if (!messageFromServer.getClass().getName().equals(ApproveRequest.class.getName())){
-                    ApproveRequest approveRequest = (ApproveRequest) messageFromServer;
-                    String userJoining = approveRequest.username;
-//                    Boolean approve = showJoinRequest(userJoining);
-                    
-//                    writeMsg(bufferedWriter, new ApproveRequest(approve));
-                }
-            }
-        } catch (IOException e) {
-            logger.logWarn("Update thread received IO exception on socket.");
-            throw new RuntimeException(e);
-        }
-
 
     }
 }

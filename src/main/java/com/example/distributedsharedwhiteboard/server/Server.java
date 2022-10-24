@@ -216,7 +216,7 @@ public class Server {
             DataInputStream in = new DataInputStream(userList.getManagerSocket().getInputStream());
             BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
-            writeMsg(bw, new ApproveRequest(userName, clientSocket));
+            writeMsg(bw, new ApproveRequest(userName));
 
             // need to handle manager response here
             Message readMsg = util.readMsg(br);
@@ -314,42 +314,25 @@ public class Server {
             case "com.example.distributedsharedwhiteboard.message.ReloadRequest":
                 ReloadRequest reloadRequest = (ReloadRequest) message;
                 String managerName1 = reloadRequest.managerName;
-                List<String>  reloadShapes= reloadRequest.shapes;
+                String[] reloadShapes= reloadRequest.shapes;
                 if (managerName1 == userList.getManagerName()){
                     for (String jsonObject: reloadShapes){
                         ShapeDrawing shapeDrawing1 = TransferToShape(jsonObject);
                         objectsList.addAnObject(shapeDrawing1);
-                        util.writeMsg(bufferedWriter,new UpdateShapeRequest(shapeDrawing1, managerName1));
+                        incomingUpdates.add(new UpdateShapeRequest(shapeDrawing1, managerName1));
                     }
                     util.writeMsg(bufferedWriter,new ReloadReply(true));
                 }else {
                     util.writeMsg(bufferedWriter, new ErrorMsg("Something went wrong reloading the file"));
                 }
                 break;
-//            case "com.example.distributedsharedwhiteboard.message.ApproveReply":
-//                ApproveReply approveReply = (ApproveReply) message;
-//                svrLogger.logDebug("Received approve reply from manager!");
-//                Boolean approve = approveReply.approve;
-//                if (approve){
-//                        String userJoining = approveReply.username;
-//                        // TODO: Something wrong here...
-//                        // TODO: Already get clientIp and clientPort from approveReply, how to put them together? I need the original clientSocket to send back JoinReply
-//
-//                        // retrieve socket of user who want to join
-//
-//                        Socket userSocket = new Socket(approveReply.clientIp, approveReply.clientPort);
-//                        svrLogger.logDebug("userSocket:" + userSocket);
-//                        Boolean successAddUser= userList.addAUser(userJoining,userSocket);
-//                        if (successAddUser) {
-//                            svrLogger.logDebug("A new user:"+ approveReply.username + " has been added");
-//                            writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
-//                        } else {
-//                            writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
-//                        }
-//                } else {
-//                    writeMsg(bufferedWriter, new ErrorMsg("Manager not approve your join..."));
-//                }
-//                break;
+            case "com.example.distributedsharedwhiteboard.message.SendMsgRequest":
+                SendMsgRequest sendMsgRequest = (SendMsgRequest) message;
+                String chatMsg = sendMsgRequest.msg;
+                String fromWhom = sendMsgRequest.username;
+                writeMsg(bufferedWriter, new SendMsgReply(true));
+                incomingUpdates.add(new UpdateMsgRequest(chatMsg, fromWhom));
+                break;
             default:
                 writeMsg(bufferedWriter,new ErrorMsg("handleCommand: Expecting a request message"));
 

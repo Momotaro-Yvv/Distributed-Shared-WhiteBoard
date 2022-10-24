@@ -32,6 +32,8 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class managerController extends userController {
@@ -125,7 +127,8 @@ public class managerController extends userController {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // TODO: send reload request to server
-        manager.sendReloadRequest();
+        List<ShapeDrawing> shapeDrawings = new ArrayList<>();
+        manager.sendReloadRequest(shapeDrawings);
     }
 
     @FXML
@@ -254,6 +257,24 @@ public class managerController extends userController {
         } else {
 //            manager.sendTerminateMsg();
             Platform.exit();
+        }
+    }
+
+    @Override
+    protected void handleSendMsg(ActionEvent event) {
+
+        // get msg
+        String input = msg.getText();
+
+
+        // check if text is empty
+        if (input != null && input.length() != 0) {
+
+            // add msg to message history
+            msgHistory.getItems().add("Me: " + input);
+            manager.sendChatMsg(input);
+            // clear input
+            msg.clear();
         }
     }
 

@@ -17,19 +17,10 @@ public class ApproveReply extends Message{
 
     @JsonElement
     public String username;
-
-    @JsonElement
-    public String clientIp;
-
-    @JsonElement
-    public Integer clientPort;
-
     public ApproveReply(){};
 
-    public ApproveReply(Boolean approve, String username, String clientIp, Integer clientPort){
+    public ApproveReply(Boolean approve, String username){
         this.approve = approve;
         this.username = username;
-        this.clientIp  = clientIp;
-        this.clientPort = clientPort;
     }
 }

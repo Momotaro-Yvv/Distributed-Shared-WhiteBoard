@@ -31,6 +31,7 @@ public class util {
      */
     static public Message readMsg(BufferedReader bufferedReader) throws IOException, JsonSerializationException {
         String jsonStr = bufferedReader.readLine();
+        utilLogger.logDebug("readMsg:"+ jsonStr);
         if(jsonStr!=null) {
             Message msg = (Message) MessageFactory.deserialize(jsonStr);
             return msg;
@@ -66,13 +67,13 @@ public class util {
         return shapeDrawings;
     }
 
-    static public List<String> TransferToShapeList(List<ShapeDrawing> shapeDrawing) {
+    static public String[] TransferToShapeList(List<ShapeDrawing> shapeDrawing) {
         List<String> jsonShapes= new ArrayList<>();
         for (ShapeDrawing shape: shapeDrawing){
             String jsonShape = TransferFromShape(shape);
             jsonShapes.add(jsonShape);
         }
-        return jsonShapes;
+        return jsonShapes.toArray(new String[0]);
     }
 }
 

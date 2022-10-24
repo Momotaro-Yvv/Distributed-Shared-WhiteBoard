@@ -12,14 +12,14 @@ import java.util.List;
 public class ReloadRequest extends Message{
 
     @JsonElement
-    public List<String> shapes;
+    public String[] shapes;
 
     @JsonElement
     public String managerName;
 
     public ReloadRequest(){}
 
-    public ReloadRequest(List<String> shapes, String managerName){
+    public ReloadRequest(String[] shapes, String managerName){
         this.shapes = shapes;
         this.managerName = managerName;
     }

@@ -1,8 +1,18 @@
 package com.example.distributedsharedwhiteboard.Application;
 
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.message.DrawRequest;
+import com.example.distributedsharedwhiteboard.message.KickRequest;
+import com.example.distributedsharedwhiteboard.message.ReloadRequest;
+import com.example.distributedsharedwhiteboard.message.TerminateWB;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.List;
+
+import static com.example.distributedsharedwhiteboard.Util.util.TransferToShapeList;
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 public class Manager extends User {
 
@@ -18,10 +28,31 @@ public class Manager extends User {
     //Methods
     void approveJoinRequest(boolean decision){};
 
-    void sendKickUserMsg(String username){};
+    void sendKickUserMsg(String userKicked){
+        try {
+            writeMsg(bufferedWriter, new KickRequest(this.userNameProperty().getName(), userKicked));
+        } catch (IOException e) {
+            logger.logError("Failed to send KinckRequest...");
+            throw new RuntimeException(e);
+        }
+    };
 
-    void sendTerminateMsg(){};
+    void sendTerminateMsg(){
+        try {
+            writeMsg(bufferedWriter, new TerminateWB(this.userNameProperty().getName()));
+        } catch (IOException e) {
+            logger.logError("Failed to send TerminateWB Request...");
+            throw new RuntimeException(e);
+        }
+    };
 
-    void sendReloadRequest(){}
+    void sendReloadRequest(List<ShapeDrawing> shapeDrawings){
+        try {
+            writeMsg(bufferedWriter, new ReloadRequest(TransferToShapeList(shapeDrawings), this.userNameProperty().getName()));
+        } catch (IOException e) {
+            logger.logError("Failed to send Reload Request...");
+            throw new RuntimeException(e);
+        }
+    }
 
 }

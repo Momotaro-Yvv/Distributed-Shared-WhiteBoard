@@ -7,7 +7,7 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializable;
  * Request from user to send a chat message to chat box
  */
 @JsonSerializable
-public class SendMsgReuqest extends Message{
+public class SendMsgRequest extends Message{
 
     @JsonElement
     public String username;
@@ -15,9 +15,9 @@ public class SendMsgReuqest extends Message{
     @JsonElement
     public String msg;
 
-    public SendMsgReuqest(){}
+    public SendMsgRequest(){}
 
-    public SendMsgReuqest(String username, String msg){
+    public SendMsgRequest(String username, String msg){
         this.username = username;
         this.msg = msg;
     }
