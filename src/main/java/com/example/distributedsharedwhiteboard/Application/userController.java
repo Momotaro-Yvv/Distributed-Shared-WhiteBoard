@@ -108,6 +108,7 @@ public class userController {
     protected void setUp() {
         // prepare shape list
         drawedShapes = FXCollections.observableArrayList();
+        undrawedShape = FXCollections.observableArrayList();
 
         todoCmds = FXCollections.observableArrayList();
 
@@ -174,10 +175,9 @@ public class userController {
         System.out.println("USER LIST: " + user.getUserList());
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         Bindings.bindContentBidirectional(user.getEventList(), todoCmds);
+        Bindings.bindContentBidirectional(undrawedShape, user.getUndrawedList());
 
-        user.addUserItem("Test only : user1");
-
-        user.getUndrawedList().addListener(new ListChangeListener() {
+        undrawedShape.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
 
@@ -187,7 +187,6 @@ public class userController {
                     if (c.wasAdded()) {
                         for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
-
                             drawNewShape((ShapeDrawing) s);
                         }
                     }
@@ -207,6 +206,9 @@ public class userController {
                         for (Object s : c.getAddedSubList()) {
                             ControllerCmd cmd = (ControllerCmd) s;
                             switch (cmd.cmd) {
+                                case "clearCanvas":
+                                    clearCanvas();
+                                    break;
                                 case "showInfoDialog":
                                     showInfoDialog(cmd.param);
                                     break;
@@ -564,6 +566,14 @@ public class userController {
         alert.setContentText(message);
 
         alert.showAndWait();
+    }
+
+    protected void clearCanvas() {
+        // clear all changes
+        drawedShapes.clear();
+
+        // clear the canvas
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     public void setUser(User user) {

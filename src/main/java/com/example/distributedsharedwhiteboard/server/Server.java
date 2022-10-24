@@ -304,9 +304,6 @@ public class Server {
             case "com.example.distributedsharedwhiteboard.message.TerminateWB":
                 TerminateWB terminate = (TerminateWB) message;
                 if (terminate.managerName.equals(userList.getManagerName())){
-//                    userList.clearUserList();
-//                    objectsList.clearObjectList();
-//                    msgList.clearMsgList();
                     util.writeMsg(bufferedWriter,new Goodbye("See You!"));
                     userList.userQuit(terminate.managerName);
                 } else {
@@ -319,13 +316,20 @@ public class Server {
                 ReloadRequest reloadRequest = (ReloadRequest) message;
                 String managerName1 = reloadRequest.managerName;
                 String[] reloadShapes= reloadRequest.shapes;
-                if (managerName1 == userList.getManagerName()){
-                    for (String jsonObject: reloadShapes){
-                        ShapeDrawing shapeDrawing1 = TransferToShape(jsonObject);
-                        objectsList.addAnObject(shapeDrawing1);
-                        incomingUpdates.add(new UpdateShapeRequest(shapeDrawing1, managerName1));
-                    }
+                if (managerName1.equals(userList.getManagerName())){
+
                     util.writeMsg(bufferedWriter,new ReloadReply(true));
+
+                    // check reload is empty or not
+                    objectsList.clearObjectList();
+                    if (reloadShapes.length > 0) {
+                        // white board reload
+                        for (String shape : reloadShapes) {
+                            objectsList.addAnObject(TransferToShape(shape));
+                        }
+                    }
+                    incomingUpdates.add(reloadRequest);
+
                 }else {
                     util.writeMsg(bufferedWriter, new ErrorMsg("Something went wrong reloading the file"));
                 }
