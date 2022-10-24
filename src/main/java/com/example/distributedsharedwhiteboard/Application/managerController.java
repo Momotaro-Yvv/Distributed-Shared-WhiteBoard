@@ -514,6 +514,29 @@ public class managerController extends userController {
         // update unsave status
         isUnsaved = true;
     }
+
+    @Override
+    protected void drawText() {
+
+        String text = textfield.getText();
+
+        if (text.length() > 0) {
+            gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
+
+            // add drawed shape to list
+            TextDrawing drawing = new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text, colorPicker.getValue());
+            manager.sendDrawMsg(drawing);
+            drawedShapes.add(drawing);
+
+            // update unsave status
+            isUnsaved = true;
+
+            textfield.clear();
+        }
+
+        pane.getChildren().remove(textfield);
+    }
+
     /**
      * Invoke this message to display a dialog to notify user about unsaved changes
      * @return true if changes were saved or user insist on closing the application,
