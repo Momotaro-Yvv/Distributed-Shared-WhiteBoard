@@ -64,7 +64,7 @@ To use this project, first clone the repo on your device using the command below
 
 ```git init```
 
-[update git url later]: <> (```git clone https://github.com/navendu-pottekkat/nsfw-filter.git```)
+```git clone https://github.com/Momotaro-Yvv/Distributed-Shared-WhiteBoard_DSProject2.git```
 
 
 # Usage
