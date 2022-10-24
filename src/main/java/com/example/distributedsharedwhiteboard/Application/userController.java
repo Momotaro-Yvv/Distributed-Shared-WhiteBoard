@@ -173,6 +173,7 @@ public class userController {
         Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
         System.out.println("USER LIST: " + user.getUserList());
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
+        Bindings.bindContentBidirectional(user.getEventList(), todoCmds);
 
         user.addUserItem("Test only : user1");
 
@@ -210,7 +211,7 @@ public class userController {
                                     showInfoDialog(cmd.param);
                                     break;
                                 case "handleQuit":
-                                    handleQuit(null);
+                                    Platform.exit();
                                     break;
                             }
                         }

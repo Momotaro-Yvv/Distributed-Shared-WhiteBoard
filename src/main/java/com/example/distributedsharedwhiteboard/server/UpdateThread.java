@@ -32,11 +32,6 @@ public class UpdateThread extends Thread{
             try {
                 Message message = incomingUpdates.take();
                 for (Socket other : userList.getAllSockets()) {
-//                    String sender;
-                    // TODO; when putting new message to this queue, enclose user who initialize this update
-//                    if (other == userList.getUserSocketByName(sender)) {
-//                        continue;//ignore the sender client.
-//                    }
                     DataOutputStream out = new DataOutputStream(other.getOutputStream());
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
                     writeMsg(bw, message);

@@ -134,7 +134,7 @@ public class managerController extends userController {
                                     showJoinRequest(cmd.param);
                                     break;
                                 case "handleQuit":
-                                    handleQuit(null);
+                                    Platform.exit();
                                     break;
                             }
                         }
@@ -284,11 +284,9 @@ public class managerController extends userController {
             boolean option = showUnsaveDialog();
             if (option) {
                 manager.sendTerminateMsg();
-                Platform.exit();
             }
         } else {
-//            manager.sendTerminateMsg();
-            Platform.exit();
+            manager.sendTerminateMsg();
         }
     }
 

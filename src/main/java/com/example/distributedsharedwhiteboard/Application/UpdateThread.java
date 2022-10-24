@@ -134,8 +134,9 @@ public class UpdateThread extends Thread {
                     Goodbye goodbye = (Goodbye) msgFromSvr;
 
                     Platform.runLater(() -> {
-                        eventList.add(new ControllerCmd("showInfoDialog", goodbye.goodbye));
+                        eventList.add(new ControllerCmd("handleQuit", null));
                     });
+                    this.interrupt();
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }

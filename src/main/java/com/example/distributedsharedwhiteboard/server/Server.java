@@ -291,9 +291,11 @@ public class Server {
             case "com.example.distributedsharedwhiteboard.message.QuitMsg":
                 QuitRequest quitRequest = (QuitRequest) message;
                 String userQuitting = quitRequest.username;
-                Boolean success1 = userList.userQuit(userQuitting);
-                if (success1){
+
+
                     util.writeMsg(bufferedWriter, new QuitReply(true));
+                    Boolean success = userList.userQuit(userQuitting);
+                if (success){
                     incomingUpdates.add(new UpdateDeleteUserRequest(userQuitting));
                 } else {
                     util.writeMsg(bufferedWriter,new ErrorMsg("Something went wrong when the user tries to leave"));
@@ -301,11 +303,12 @@ public class Server {
                 break;
             case "com.example.distributedsharedwhiteboard.message.TerminateWB":
                 TerminateWB terminate = (TerminateWB) message;
-                if (terminate.managerName == userList.getManagerName()){
-                    userList.clearUserList();
-                    objectsList.clearObjectList();
-                    msgList.clearMsgList();
-                    util.writeMsg(bufferedWriter,new Goodbye());
+                if (terminate.managerName.equals(userList.getManagerName())){
+//                    userList.clearUserList();
+//                    objectsList.clearObjectList();
+//                    msgList.clearMsgList();
+                    util.writeMsg(bufferedWriter,new Goodbye("See You!"));
+                    userList.userQuit(terminate.managerName);
                 } else {
                     util.writeMsg(bufferedWriter, new ErrorMsg("You are not authorised to terminate white board"));
                 }
