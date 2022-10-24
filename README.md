@@ -86,8 +86,12 @@ Join exist whiteboard:
 # Features
 
 - Interactive canvas shared by multiple users
-- Simple and clear GUI
-- 
+- Simple and clear paint GUI
+- Chat functionality
+- Save whiteboard to image(png format)
 
 # Reference:
+
+JavaFx API documentation
+https://openjfx.io/javadoc/19/
 
