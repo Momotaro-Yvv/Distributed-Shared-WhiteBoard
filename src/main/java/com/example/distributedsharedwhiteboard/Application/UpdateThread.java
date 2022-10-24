@@ -87,14 +87,18 @@ public class UpdateThread extends Thread {
                         logger.logDebug(username+ ": The new shape is not from me.....");
                         String msg = updateMsgRequest.msg;
                         String line = byWhom + ": " + msg;
-                        msgList.add(line);
+                        Platform.runLater(() -> {
+                            msgList.add(line);
+                        });
                     };
 
                 } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
                     UpdateDeleteUserRequest updateDeleteUserRequest = (UpdateDeleteUserRequest) msgFromSvr;
                     String userNameToDelete = updateDeleteUserRequest.deleteUserName;
                     if (!userNameToDelete.equals(username)){
-                        userList.remove(userNameToDelete);
+                        Platform.runLater(() -> {
+                            userList.remove(userNameToDelete);
+                        });
                     }
 
                 } else if (msgFromSvr.getClass().getName() == UpdateShapeRequest.class.getName()) {
@@ -105,13 +109,17 @@ public class UpdateThread extends Thread {
                     if (!byWhom.equals(username)){
                         logger.logDebug("The new shape is not from me.....");
                         ShapeDrawing shapeDrawing = TransferToShape(shapeString);
-                        undrawedList.add(shapeDrawing);
+                        Platform.runLater(() -> {
+                            undrawedList.add(shapeDrawing);
+                        });
                     }
                 } else if (msgFromSvr.getClass().getName() == UpdateUserlistRequest.class.getName()){
                     UpdateUserlistRequest updateUserlistRequest = (UpdateUserlistRequest) msgFromSvr;
                     String newUserName = updateUserlistRequest.newUserName;
                     if(!newUserName.equals(username)){
-                        userList.add(newUserName);
+                        Platform.runLater(() -> {
+                            userList.add(newUserName);
+                        });
                     }
                 } else {
                     logger.logDebug(msgFromSvr.toString());
