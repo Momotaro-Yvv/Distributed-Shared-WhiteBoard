@@ -6,14 +6,16 @@ module com.example.distributedsharedwhiteboard {
     requires org.json;
 
 
-    opens com.example.distributedsharedwhiteboard to javafx.fxml;
-    exports com.example.distributedsharedwhiteboard;
-    exports com.example.distributedsharedwhiteboard.server;
-    opens com.example.distributedsharedwhiteboard.server to javafx.fxml;
-    exports com.example.distributedsharedwhiteboard.client;
-    opens com.example.distributedsharedwhiteboard.client to javafx.fxml;
-    exports com.example.distributedsharedwhiteboard.Application;
-    opens com.example.distributedsharedwhiteboard.Application to javafx.fxml;
-    exports com.example.distributedsharedwhiteboard.Util;
-    opens com.example.distributedsharedwhiteboard.Util to javafx.fxml;
+    opens DistributedSharedWhiteboard to javafx.fxml;
+    exports DistributedSharedWhiteboard;
+    exports DistributedSharedWhiteboard.server;
+    opens DistributedSharedWhiteboard.server to javafx.fxml;
+    exports DistributedSharedWhiteboard.client;
+    opens DistributedSharedWhiteboard.client to javafx.fxml;
+    exports DistributedSharedWhiteboard.Application;
+    opens DistributedSharedWhiteboard.Application to javafx.fxml;
+    exports DistributedSharedWhiteboard.Util;
+    opens DistributedSharedWhiteboard.Util to javafx.fxml;
+    exports DistributedSharedWhiteboard.ShapeDrawing;
+    opens DistributedSharedWhiteboard.ShapeDrawing to javafx.fxml;
 }
