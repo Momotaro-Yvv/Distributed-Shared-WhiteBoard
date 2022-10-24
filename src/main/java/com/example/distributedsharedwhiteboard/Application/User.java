@@ -27,7 +27,7 @@ public class User {
     private ObservableList<String> userList;
     private ObservableList<ControllerCmd> eventList;
 
-    private ObservableList<ShapeDrawing> undrawedList;
+    protected ObservableList<ShapeDrawing> undrawedList;
 
     // Connection
     protected Socket socket;

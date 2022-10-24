@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.BasicPermission;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.ArrayList;
 
 import static com.example.distributedsharedwhiteboard.Util.util.*;
 
@@ -134,9 +135,35 @@ public class UpdateThread extends Thread {
                     Goodbye goodbye = (Goodbye) msgFromSvr;
 
                     Platform.runLater(() -> {
+                        if (!goodbye.goodbye.equals("See You!")) {
+                            eventList.add(new ControllerCmd("showInfoDialog", goodbye.goodbye));
+                        }
                         eventList.add(new ControllerCmd("handleQuit", null));
                     });
                     this.interrupt();
+                } else if (msgFromSvr.getClass().getName() == ReloadRequest.class.getName()){
+                    ReloadRequest reloadRequest = (ReloadRequest) msgFromSvr;
+                    String[] reloadShapes= reloadRequest.shapes;
+                    ArrayList<ShapeDrawing> reloadShapesConverted = new ArrayList<ShapeDrawing>();
+                    for (String shape : reloadShapes) {
+                        reloadShapesConverted.add(TransferToShape(shape));
+                    }
+
+                    if(!reloadRequest.managerName.equals(username)){
+                        Platform.runLater(() -> {
+                            // clear canvas
+                            eventList.add(new ControllerCmd("clearCanvas", null));
+
+                            // add undrawedList
+                            if (reloadShapes.length > 0) {
+                                for (ShapeDrawing shape : reloadShapesConverted) {
+                                    undrawedList.add(shape);
+                                }
+                            }
+
+                        });
+                    }
+
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }

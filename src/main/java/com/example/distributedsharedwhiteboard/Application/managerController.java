@@ -97,8 +97,9 @@ public class managerController extends userController {
 
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
         Bindings.bindContentBidirectional(manager.getEventList(), todoCmds);
+        Bindings.bindContentBidirectional(undrawedShape, manager.getUndrawedList());
 
-        manager.getUndrawedList().addListener(new ListChangeListener() {
+        undrawedShape.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
 
@@ -127,6 +128,9 @@ public class managerController extends userController {
                         for (Object s : c.getAddedSubList()) {
                             ControllerCmd cmd = (ControllerCmd) s;
                             switch (cmd.cmd) {
+                                case "clearCanvas":
+                                    clearCanvas();
+                                    break;
                                 case "showInfoDialog":
                                     showInfoDialog(cmd.param);
                                     break;
@@ -152,15 +156,12 @@ public class managerController extends userController {
             showUnsaveDialog();
         }
 
-        // clear all changes
-        drawedShapes.clear();
-
-        // clear the canvas
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        clearCanvas();
 
         // TODO: send reload request to server
         List<ShapeDrawing> shapeDrawings = new ArrayList<>();
-        manager.sendReloadRequest(shapeDrawings);
+        manager.sendReloadRequest(drawedShapes);
+//        manager.sendReloadRequest(shapeDrawings);
     }
 
     @FXML
@@ -182,12 +183,17 @@ public class managerController extends userController {
                 BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 // add shapes to undrawed list
+                List<ShapeDrawing> shapeDrawings = new ArrayList<>();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     ShapeDrawing shape = util.TransferToShape(line);
 
-                    // TODO: add loaded shapes to undrawed list
+                    shapeDrawings.add(shape);
                 }
+
+                clearCanvas();
+
+                undrawedShape.addAll(shapeDrawings);
 
                 // close reader
                 reader.close();
@@ -198,8 +204,7 @@ public class managerController extends userController {
                 System.out.println("Error!");
             }
         }
-
-        // TODO: send reload request to server
+        manager.sendReloadRequest(undrawedShape);
     }
 
     @FXML
