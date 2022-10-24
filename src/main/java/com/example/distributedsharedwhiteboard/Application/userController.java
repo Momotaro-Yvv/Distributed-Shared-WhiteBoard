@@ -73,11 +73,15 @@ public class userController {
 
     protected GraphicsContext gc;
 
-    private String modeID;
+    protected String modeID;
 
-    private double startX, startY, endX, endY;
+    protected double startX;
+    protected double startY;
+    protected double endX;
+    protected double endY;
 
     protected ObservableList<ShapeDrawing> drawedShapes;
+    protected ObservableList<ShapeDrawing> undrawedShape;
 
     protected ObservableList<String> todoEvents;
 
@@ -89,7 +93,7 @@ public class userController {
      * @param arr - Double array to convert
      * @return double array converted
      */
-    private double[] DoubleTodouble(Double[] arr) {
+    protected double[] DoubleTodouble(Double[] arr) {
         double[] value = new double[arr.length];
         for (int i = 0; i < arr.length; i++) {
             value[i] = arr[i];
@@ -103,6 +107,7 @@ public class userController {
      */
     protected void setUp() {
         // prepare shape list
+        undrawedShape = FXCollections.observableArrayList();
         drawedShapes = FXCollections.observableArrayList();
 
         todoEvents = FXCollections.observableArrayList();
@@ -157,8 +162,6 @@ public class userController {
         user = JoinWhiteBoard.getUser();
         System.out.println("User set up!");
         // TODO: find a way to access the controller
-        user.controller = this;
-
         // set up default settings
         setUp();
 
@@ -168,25 +171,25 @@ public class userController {
 
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
+//
+//        Bindings.bindContentBidirectional(undrawedShape, user.getUndrawedList());
+        undrawedShape.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
 
-//        drawedShapes.addListener(new ListChangeListener() {
-//            @Override
-//            public void onChanged(ListChangeListener.Change c) {
-//
-//                while (c.next()) {
-//
-//                    // if anything was added to list
-//                    if (c.wasAdded()) {
-//                        for (Object s : c.getAddedSubList()) {
-//                            // ask user to send a updateRequest to server
-//                            ShapeDrawing shape = (ShapeDrawing) s;
-//                            user.sendDrawMsg(shape);
-//                        }
-//                    }
-//                }
-//            }
-//
-//        });
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            // ask user to send a updateRequest to server
+                            drawNewShape((ShapeDrawing) s);
+                        }
+                    }
+                }
+            }
+
+        });
     }
 
     @FXML

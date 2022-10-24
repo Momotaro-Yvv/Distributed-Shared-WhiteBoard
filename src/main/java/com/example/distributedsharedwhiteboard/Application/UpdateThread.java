@@ -1,6 +1,7 @@
 package com.example.distributedsharedwhiteboard.Application;
 
 import com.example.distributedsharedwhiteboard.Logger;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.ApproveRequest;
 import com.example.distributedsharedwhiteboard.message.ErrorMsg;
@@ -17,23 +18,32 @@ import java.security.BasicPermission;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static com.example.distributedsharedwhiteboard.Util.util.readMsg;
-import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
+import static com.example.distributedsharedwhiteboard.Util.util.*;
 
 public class UpdateThread extends Thread {
     private Logger logger;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private ObservableList<String> eventList;
-    private userController controller;
 
-    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger,
-                        ObservableList<String> eventList, userController controller) {
+    private ObservableList<ShapeDrawing> undrawedList;
+    private ObservableList<String> msgList;
+    private ObservableList<String> userList;
+    private String username;
+
+    public UpdateThread(String username, BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger,
+                        ObservableList<String> eventList,
+                        ObservableList<ShapeDrawing> undrawedList,
+                        ObservableList<String> msgList,
+                        ObservableList<String> userList) {
+        this.username = username;
         this.logger = logger;
         this.bufferedReader = bufferedReader;
         this.bufferedWriter = bufferedWriter;
         this.eventList = eventList;
-        this.controller = controller;
+        this.undrawedList = undrawedList;
+        this.msgList = msgList;
+        this.userList = userList;
     }
 
     @Override
@@ -42,6 +52,7 @@ public class UpdateThread extends Thread {
 
             try {
                 Message msgFromSvr = readMsg(bufferedReader);
+                logger.logDebug(msgFromSvr.toString());
 
                 if (msgFromSvr.getClass().getName() == ApproveRequest.class.getName()) {
                     ApproveRequest approveRequest = (ApproveRequest) msgFromSvr;
@@ -49,30 +60,61 @@ public class UpdateThread extends Thread {
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
 
                     Platform.runLater(() -> {
-//                        eventList.add("showJoinRequest");
-                        managerController mc = (managerController)controller;
-                        mc.showJoinRequest(userJoining);
+                        eventList.add("showJoinRequest");
                     });
                 } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;
                     logger.logDebug(drawReply.toString());
+
                 } else if (msgFromSvr.getClass().getName() == SendMsgReply.class.getName()) {
+                    logger.logDebug("received SendMsgReply!!!");
                     SendMsgReply sendMsgReply = (SendMsgReply) msgFromSvr;
                     Boolean success = sendMsgReply.success;
                     logger.logDebug(sendMsgReply.toString());
+
+
                 } else if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
                     QuitReply quitReply = (QuitReply) msgFromSvr;
                     if (quitReply.success) {
+                        eventList.add("handleQuit");
                         break;
                     }
                 } else if (msgFromSvr.getClass().getName() == UpdateMsgRequest.class.getName()) {
                     // add msg to GUI chat window
+                    UpdateMsgRequest updateMsgRequest = (UpdateMsgRequest) msgFromSvr;
+                    String byWhom = updateMsgRequest.byWhom;
+                    if (!byWhom.equals(username)){
+                        logger.logDebug(username+ ": The new shape is not from me.....");
+                        String msg = updateMsgRequest.msg;
+                        String line = byWhom + ": " + msg;
+                        msgList.add(line);
+                    };
+                    break;
+
                 } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
+                    UpdateDeleteUserRequest updateDeleteUserRequest = (UpdateDeleteUserRequest) msgFromSvr;
+                    String userNameToDelete = updateDeleteUserRequest.deleteUserName;
+                    if (!userNameToDelete.equals(username)){
+                        userList.remove(userNameToDelete);
+                    }
 
                 } else if (msgFromSvr.getClass().getName() == UpdateShapeRequest.class.getName()) {
-
+                    UpdateShapeRequest updateShapeRequest = (UpdateShapeRequest) msgFromSvr;
+                    String byWhom = updateShapeRequest.byWhom;
+                    String shapeString =  updateShapeRequest.shape;
+                    logger.logDebug("username: "+ username + "byWhom: "+ byWhom);
+                    if (!byWhom.equals(username)){
+                        logger.logDebug("The new shape is not from me.....");
+                        ShapeDrawing shapeDrawing = TransferToShape(shapeString);
+                        undrawedList.add(shapeDrawing);
+                    }
+                    break;
                 } else if (msgFromSvr.getClass().getName() == UpdateUserlistRequest.class.getName()){
-
+                    UpdateUserlistRequest updateUserlistRequest = (UpdateUserlistRequest) msgFromSvr;
+                    String newUserName = updateUserlistRequest.newUserName;
+                    if(!newUserName.equals(username)){
+                        userList.add(newUserName);
+                    }
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }

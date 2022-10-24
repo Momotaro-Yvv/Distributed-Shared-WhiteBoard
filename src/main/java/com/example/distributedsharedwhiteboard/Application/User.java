@@ -27,6 +27,8 @@ public class User {
     private ObservableList<String> userList;
     private ObservableList<String> eventList;
 
+    private ObservableList<ShapeDrawing> undrawedList;
+
     // Connection
     protected Socket socket;
     private InputStream inputStream;
@@ -36,8 +38,6 @@ public class User {
 
     private UpdateThread updateThread;
 
-    protected userController controller;
-
     //Constructors
     public User(String username, Socket socket) throws IOException {
         this.userName = new SimpleStringProperty(username) ;
@@ -45,6 +45,7 @@ public class User {
         this.msgList = FXCollections.observableArrayList();
         this.userList = FXCollections.observableArrayList();
         this.eventList = FXCollections.observableArrayList();
+        this.undrawedList = FXCollections.observableArrayList();
         this.userList.add(username);
 
         this.socket = socket;
@@ -53,7 +54,8 @@ public class User {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.logger = new Logger();
-        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger, eventList, controller);
+        updateThread = new UpdateThread(this.userName.getValue(), bufferedReader, bufferedWriter, logger,
+                eventList, undrawedList, msgList, userList);
         updateThread.start();
     };
 
@@ -61,6 +63,10 @@ public class User {
 
     public ObservableList<ShapeDrawing> getObjectList() {
         return objectList;
+    }
+
+    public ObservableList<ShapeDrawing> getUndrawedList() {
+        return undrawedList;
     }
 
     public ObservableList<String> getMsgList() {

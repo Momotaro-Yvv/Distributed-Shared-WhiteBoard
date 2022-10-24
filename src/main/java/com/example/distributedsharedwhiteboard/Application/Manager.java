@@ -9,7 +9,6 @@ import com.example.distributedsharedwhiteboard.message.ReloadRequest;
 import com.example.distributedsharedwhiteboard.message.TerminateWB;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.List;
 
@@ -43,7 +42,7 @@ public class Manager extends User {
         try {
             writeMsg(bufferedWriter, new KickRequest(this.userNameProperty().getValue(), userKicked));
         } catch (IOException e) {
-            logger.logError("Failed to send KinckRequest...");
+            logger.logError("Failed to send KickRequest...");
             throw new RuntimeException(e);
         }
     };

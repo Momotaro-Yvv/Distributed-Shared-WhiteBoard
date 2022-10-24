@@ -1,7 +1,6 @@
 package com.example.distributedsharedwhiteboard.Application;
 
-import com.example.distributedsharedwhiteboard.ShapeDrawing.CircleDrawing;
-import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
+import com.example.distributedsharedwhiteboard.ShapeDrawing.*;
 import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
 import com.example.distributedsharedwhiteboard.Util.*;
 
@@ -19,6 +18,9 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.control.*;
@@ -85,16 +87,15 @@ public class managerController extends userController {
     public void initialize(){
         manager = CreateWhiteBoard.getManager();
         System.out.println("Manager set up!");
-        manager.controller = this;
 
         setUp();
 
         // bind variables
         Bindings.bindContentBidirectional(manager.getMsgList(), msgHistory.getItems());
-        manager.addMsgItem("test only : message"); // now can access msgHistory via msgList
+//        manager.addMsgItem("test only : message"); // now can access msgHistory via msgList
 
         Bindings.bindContentBidirectional(manager.getUserList(),userList.getItems());
-        manager.addUserItem("Test only : user1");
+//        manager.addUserItem("Test only : user1");
 
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
         Bindings.bindContentBidirectional(manager.getEventList(),todoEvents);
@@ -306,6 +307,214 @@ public class managerController extends userController {
         }
     }
 
+    @Override
+    protected void handleDraw(MouseEvent event) {
+
+        // check mouse event
+        if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+
+            // set drawing mode
+            modeID = ((ToggleButton)(drawMode.getSelectedToggle())).getId();
+
+            // set start x and y
+            startX = event.getX();
+            startY = event.getY();
+
+            switch (modeID) {
+                case "dm_free":
+                    pane.getChildren().add(path);
+
+                    path.setStroke(colorPicker.getValue());
+
+                    path.getElements().add(new MoveTo(startX, startY));
+                    break;
+                case "dm_text":
+                    // if a textbox is already existed
+                    if (pane.getChildren().contains(textfield)) {
+
+                        drawText();
+                    }
+                    pane.getChildren().add(textfield);
+                    textfield.setLayoutX(startX);
+                    textfield.setLayoutY(startY);
+                    textfield.requestFocus();
+                    break;
+                case "dm_line":
+                    // add shape to pane
+                    pane.getChildren().add(line);
+
+                    // set color
+                    line.setStroke(colorPicker.getValue());
+
+                    // set coordinates for shape
+                    line.setStartX(startX);
+                    line.setStartY(startY);
+                    line.setEndX(startX);
+                    line.setEndY(startY);
+                    break;
+                case "dm_circle":
+                    pane.getChildren().add(circle);
+
+                    circle.setStroke(colorPicker.getValue());
+                    circle.setFill(null);
+
+                    circle.setCenterX(startX);
+                    circle.setCenterY(startY);
+                    circle.setRadius(0.f);
+                    break;
+                case "dm_triangle":
+                    pane.getChildren().add(polygon);
+
+                    polygon.setStroke(colorPicker.getValue());
+                    polygon.setFill(null);
+                    break;
+                case "dm_rectangle":
+                    // add shape to pane
+                    pane.getChildren().add(rectangle);
+
+                    // set color
+                    rectangle.setStroke(colorPicker.getValue());
+                    rectangle.setFill(null);
+
+                    // set coordinates for shape
+                    rectangle.setX(startX);
+                    rectangle.setY(startY);
+                    rectangle.setWidth(0f);
+                    rectangle.setHeight(0f);
+                    break;
+            }
+
+        }else if (event.getEventType() == MouseEvent.MOUSE_DRAGGED) {
+
+            endX = event.getX();
+            endY = event.getY();
+
+            switch (modeID) {
+                case "dm_free":
+                    path.getElements().add(new LineTo(endX, endY));
+                    break;
+                case "dm_line":
+                    line.setEndX(endX);
+                    line.setEndY(endY);
+                    break;
+                case "dm_circle":
+
+                    double sideLen = Math.min(Math.abs(endX - startX), Math.abs(endY - startY));
+
+                    circle.setCenterX(Math.min(startX, endX) + (sideLen / 2));
+                    circle.setCenterY(Math.min(startY, endY) + (sideLen / 2));
+                    circle.setRadius(sideLen / 2);
+                    break;
+                case "dm_triangle":
+                    double w = Math.abs(endX - startX);
+                    polygon.getPoints().clear();
+                    polygon.getPoints().addAll(new Double[]{
+                            Math.min(startX, endX), Math.max(startY, endY),
+                            Math.min(startX, endX) + 0.5 * w, Math.min(startY, endY),
+                            Math.max(startX, endX), Math.max(startY, endY) });
+                    break;
+                case "dm_rectangle":
+
+                    rectangle.setX(Math.min(startX, endX));
+                    rectangle.setY(Math.min(startY, endY));
+
+                    rectangle.setWidth(Math.abs(endX - startX));
+                    rectangle.setHeight(Math.abs(endY - startY));
+                    break;
+            }
+
+        } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+
+            endX = event.getX();
+            endY = event.getY();
+
+            switch (modeID) {
+                case "dm_free":
+                    pane.getChildren().remove(path);
+
+                    int size = path.getElements().size();
+                    Double[] xs = new Double[size];
+                    Double[] ys = new Double[size];
+
+                    gc.beginPath();
+
+                    MoveTo mt = (MoveTo) path.getElements().get(0);
+                    gc.moveTo(mt.getX(), mt.getY());
+                    xs[0] = mt.getX();
+                    ys[0] = mt.getY();
+
+                    for (int i = 1; i < size; i++) {
+                        LineTo lt = (LineTo) path.getElements().get(i);
+                        gc.lineTo(lt.getX(), lt.getY());
+                        xs[i] = lt.getX();
+                        ys[i] = lt.getY();
+                    }
+                    gc.stroke();
+                    PathDrawing pathDrawing = new PathDrawing(xs, ys, colorPicker.getValue());
+                    drawedShapes.add(pathDrawing);
+                    manager.sendDrawMsg(pathDrawing);
+
+                    path.getElements().clear();
+                    break;
+                case "dm_line":
+                    pane.getChildren().remove(line);
+
+                    LineDrawing lineDrawing = new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(),
+                            line.getEndY(), colorPicker.getValue());
+                    drawedShapes.add(lineDrawing);
+                    manager.sendDrawMsg(lineDrawing);
+
+                    // add shape to canvas via gc
+                    gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
+                    break;
+                case "dm_circle":
+                    double sideLen = Math.min(Math.abs(endX - startX), Math.abs(endY - startY));
+                    pane.getChildren().remove(circle);
+
+                    CircleDrawing circleDrawing = new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY),
+                            sideLen, colorPicker.getValue());
+                    drawedShapes.add(circleDrawing);
+                    manager.sendDrawMsg(circleDrawing);
+
+                    // add shape to canvas via gc
+                    gc.strokeOval(Math.min(startX, endX), Math.min(startY, endY), sideLen, sideLen);
+                    break;
+                case "dm_triangle":
+                    double w = Math.abs(endX - startX);
+                    pane.getChildren().remove(polygon);
+
+                    Double[] tri_xs = new Double[]{
+                            Math.min(startX, endX),
+                            Math.min(startX, endX) + 0.5 * w,
+                            Math.max(startX, endX)};
+                    Double[] tri_ys = new Double[]{
+                            Math.max(startY, endY),
+                            Math.min(startY, endY),
+                            Math.max(startY, endY)
+                    };
+
+                    TriangleDrawing triangleDrawing = new TriangleDrawing(tri_xs, tri_ys, colorPicker.getValue());
+                    manager.sendDrawMsg(triangleDrawing);
+                    drawedShapes.add(triangleDrawing);
+                    // add shape to canvas via gc
+                    gc.strokePolygon(DoubleTodouble(tri_xs), DoubleTodouble(tri_ys), 3);
+                    break;
+                case "dm_rectangle":
+                    pane.getChildren().remove(rectangle);
+
+                    RectangularDrawing rectangleDrawing = new RectangularDrawing(rectangle.getX(), rectangle.getY(),
+                            rectangle.getWidth(), rectangle.getHeight(), colorPicker.getValue());
+                    drawedShapes.add(rectangleDrawing);
+                    manager.sendDrawMsg(rectangleDrawing);
+                    // add shape to canvas via gc
+                    gc.strokeRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+                    break;
+            }
+        }
+
+        // update unsave status
+        isUnsaved = true;
+    }
     /**
      * Invoke this message to display a dialog to notify user about unsaved changes
      * @return true if changes were saved or user insist on closing the application,
