@@ -91,6 +91,7 @@ public class UpdateThread extends Thread {
                             msgList.add(line);
                         });
                     };
+
                 } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
                     UpdateDeleteUserRequest updateDeleteUserRequest = (UpdateDeleteUserRequest) msgFromSvr;
                     String userNameToDelete = updateDeleteUserRequest.deleteUserName;
