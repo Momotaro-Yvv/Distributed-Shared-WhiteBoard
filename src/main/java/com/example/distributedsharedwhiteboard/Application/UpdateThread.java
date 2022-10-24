@@ -24,7 +24,7 @@ public class UpdateThread extends Thread {
     private Logger logger;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private ObservableList<String> eventList;
+    private ObservableList<ControllerCmd> eventList;
 
     private ObservableList<ShapeDrawing> undrawedList;
     private ObservableList<String> msgList;
@@ -32,7 +32,7 @@ public class UpdateThread extends Thread {
     private String username;
 
     public UpdateThread(String username, BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger,
-                        ObservableList<String> eventList,
+                        ObservableList<ControllerCmd> eventList,
                         ObservableList<ShapeDrawing> undrawedList,
                         ObservableList<String> msgList,
                         ObservableList<String> userList) {
@@ -60,7 +60,7 @@ public class UpdateThread extends Thread {
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
 
                     Platform.runLater(() -> {
-                        eventList.add("showJoinRequest");
+                        eventList.add(new ControllerCmd("showJoinRequest", userJoining));
                     });
                 } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;
@@ -76,7 +76,9 @@ public class UpdateThread extends Thread {
                 } else if (msgFromSvr.getClass().getName() == QuitReply.class.getName()) {
                     QuitReply quitReply = (QuitReply) msgFromSvr;
                     if (quitReply.success) {
-                        eventList.add("handleQuit");
+                        Platform.runLater(() -> {
+                            eventList.add(new ControllerCmd("handleQuit", null));
+                        });
                         break;
                     }
                 } else if (msgFromSvr.getClass().getName() == UpdateMsgRequest.class.getName()) {
