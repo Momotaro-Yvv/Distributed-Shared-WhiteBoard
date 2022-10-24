@@ -128,7 +128,7 @@ public class managerController extends userController {
                             String event = s.toString();
                             switch (event) {
                                 case "showJoinRequest":
-                                    showJoinRequest("testuser");
+                                    showJoinRequest("Yvonne");
                                     break;
                             }
                         }
@@ -589,14 +589,6 @@ public class managerController extends userController {
         }
     }
 
-    /**
-     * Invoke this message when a manager want to kick out a specified user
-     * @param username - the username of kicked user
-     */
-    protected void KickOutUser(String username) {
-        manager.sendKickUserMsg(username);
-        System.out.println("kick out " + username);
-    }
 
     public void setStage(Stage stage) {
         this.stage = stage;

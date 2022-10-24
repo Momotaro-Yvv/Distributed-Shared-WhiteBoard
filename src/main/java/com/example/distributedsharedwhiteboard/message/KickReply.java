@@ -12,9 +12,13 @@ public class KickReply extends Message{
     @JsonElement
     public Boolean success;
 
+    @JsonElement
+    public String userKickOut;
+
     public KickReply(){};
 
-    public KickReply(Boolean success) {
+    public KickReply(Boolean success, String userKickOut) {
         this.success = success;
+        this.userKickOut = userKickOut;
     }
 }

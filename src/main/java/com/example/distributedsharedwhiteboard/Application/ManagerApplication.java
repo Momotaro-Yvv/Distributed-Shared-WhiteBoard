@@ -22,7 +22,7 @@ public class ManagerApplication extends Application {
         stage.getIcons().add(icon);
         stage.setTitle("WhiteBoard - Manager Window");
         stage.setScene(scene);
-        stage.setResizable(false);
+//        stage.setResizable(false);
         stage.show();
 
         managerController controller = (managerController)fxmlLoader.getController();

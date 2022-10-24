@@ -62,7 +62,14 @@ public class UpdateThread extends Thread {
                     Platform.runLater(() -> {
                         eventList.add("showJoinRequest");
                     });
-                } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
+                } else if (msgFromSvr.getClass().getName() == KickReply.class.getName()){
+                        KickReply kickReply = (KickReply) msgFromSvr;
+                        if (kickReply.success) {
+                            Platform.runLater(() -> {
+                                userList.remove(kickReply.userKickOut);
+                            });
+                        }
+                }else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;
                     logger.logDebug(drawReply.toString());
 

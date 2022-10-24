@@ -84,7 +84,8 @@ public class CreateWhiteBoard {
                 CreateReply createReply = (CreateReply) msgFromServer;
                 if (createReply.success){
                     manager = new Manager(username, socket);
-
+                    String managerName = createReply.managerName;
+                    manager.addUserItem(managerName);
                     System.out.println("Username: " + username);
                     System.out.println("Socket: " + socket);
 

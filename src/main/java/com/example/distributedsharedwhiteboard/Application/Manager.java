@@ -27,7 +27,6 @@ public class Manager extends User {
     //Setters
 
     //Methods
-    // TODO: try to invoke methods with controller
     void approveJoinRequest(boolean decision) {
         System.out.println("approveJoinRequest: " + decision);
         try {

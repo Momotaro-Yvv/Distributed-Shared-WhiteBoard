@@ -26,7 +26,7 @@ public class UserApplication extends Application {
         stage.getIcons().add(icon);
         stage.setTitle("WhiteBoard - User Window");
         stage.setScene(scene);
-        stage.setResizable(false);
+//        stage.setResizable(false);
         stage.show();
     }
 

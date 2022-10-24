@@ -95,7 +95,7 @@ public class UserList {
 
 
     public boolean kickOutUser (String manager, String userName){
-        if (managerName == manager) {
+        if (managerName.equals(manager)) {
             if (userList.contains(userName)){
                 userList.remove(userName);
                 userSockets.remove(userName);

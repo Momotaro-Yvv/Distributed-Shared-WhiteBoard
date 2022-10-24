@@ -188,7 +188,7 @@ public class Server {
         if (success) {
             objectsList = new ObjectsList();
             msgList = new MsgList();
-            writeMsg(bufferedWriter,new CreateReply(true));
+            writeMsg(bufferedWriter,new CreateReply(true, managerName));
             return true;
         } else {
             String errorMsg = "This White Board already have a manager. Please try other server port";
@@ -272,16 +272,18 @@ public class Server {
                 KickRequest kickRequest = (KickRequest) message;
                 String managerName = kickRequest.managerName;
                 String username = kickRequest.username;
-                Boolean success = userList.kickOutUser(managerName, username);
-                if (success){
-                    util.writeMsg(bufferedWriter, new KickReply(true));
+                if (managerName.equals(userList.getManagerName())){
+                    util.writeMsg(bufferedWriter, new KickReply(true, username));
 
-                    //Send ApproveRequest to Manager asking for approvement
+                    //Send notice to the user that be kicked out
                     DataOutputStream out = new DataOutputStream(userList.getUserSocketByName(username).getOutputStream());
                     BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
                     writeMsg(bw, new Goodbye("You have been kicked out by the manager."));
 
+                    Boolean success = userList.kickOutUser(managerName, username);
+                    if (success){
                     incomingUpdates.add(new UpdateDeleteUserRequest(username));
+                    }
                 } else {
                     util.writeMsg(bufferedWriter, new ErrorMsg("Can't not kick this user out"));
                 }
