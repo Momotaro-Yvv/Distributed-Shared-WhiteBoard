@@ -1,5 +1,7 @@
 package com.example.distributedsharedwhiteboard.Application;
 
+import com.example.distributedsharedwhiteboard.message.*;
+
 import com.example.distributedsharedwhiteboard.ShapeDrawing.ShapeDrawing;
 import com.example.distributedsharedwhiteboard.message.DrawRequest;
 import com.example.distributedsharedwhiteboard.message.KickRequest;
@@ -26,7 +28,15 @@ public class Manager extends User {
     //Setters
 
     //Methods
-    void approveJoinRequest(boolean decision){};
+    void approveJoinRequest(boolean decision) {
+        System.out.println("approveJoinRequest: " + decision);
+        try {
+            writeMsg(bufferedWriter, new ApproveReply(decision, "haiyao"));
+        } catch (IOException e) {
+            logger.logError("Failed to send SendMsgRequest...");
+            throw new RuntimeException(e);
+        }
+    };
 
     void sendKickUserMsg(String userKicked){
         try {

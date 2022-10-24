@@ -129,6 +129,7 @@ public class Server {
                 }
             } catch (IOException e) {
                 svrLogger.logError("Encounter IOException");
+                e.printStackTrace();
                 throw new IOException(e);
             } catch (JsonSerializationException e) {
                 svrLogger.logError("Encounter Json Serialization Exception.");

@@ -5,6 +5,9 @@ import com.example.distributedsharedwhiteboard.Util.JsonSerializationException;
 import com.example.distributedsharedwhiteboard.message.ApproveRequest;
 import com.example.distributedsharedwhiteboard.message.ErrorMsg;
 import com.example.distributedsharedwhiteboard.message.*;
+import javafx.collections.ObservableList;
+
+import javafx.application.Platform;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -21,11 +24,13 @@ public class UpdateThread extends Thread {
     private Logger logger;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    private ObservableList<String> eventList;
 
-    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger) {
+    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger, ObservableList<String> eventList) {
         this.logger = logger;
         this.bufferedReader = bufferedReader;
         this.bufferedWriter = bufferedWriter;
+        this.eventList = eventList;
     }
 
     @Override
@@ -39,7 +44,10 @@ public class UpdateThread extends Thread {
                     ApproveRequest approveRequest = (ApproveRequest) msgFromSvr;
                     String userJoining = approveRequest.username;
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
-                    writeMsg(bufferedWriter, new ApproveReply(true, userJoining));
+
+                    Platform.runLater(() -> {
+                        eventList.add("showJoinRequest");
+                    });
                 } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;
                     logger.logDebug(drawReply.toString());
@@ -63,9 +71,42 @@ public class UpdateThread extends Thread {
                 } else {
                     logger.logDebug(msgFromSvr.toString());
                 }
-            } catch (JsonSerializationException | IOException e) {
+            } catch (JsonSerializationException j) {
+                throw new RuntimeException(j);
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private void processUpdate(Socket socket){
+        InputStream inputStream = null;
+        try {
+            inputStream = socket.getInputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+
+            // keep the channel up for communication with server
+            while (true){
+                Message messageFromServer;
+                try {
+                    messageFromServer = readMsg(bufferedReader);
+                } catch (JsonSerializationException e1) {
+                    writeMsg(bufferedWriter,new ErrorMsg("Invalid message"));
+                    return;
+                }
+                if (!messageFromServer.getClass().getName().equals(ApproveRequest.class.getName())){
+                    ApproveRequest approveRequest = (ApproveRequest) messageFromServer;
+                    String userJoining = approveRequest.username;
+//                    Boolean approve = showJoinRequest(userJoining);
+                    
+//                    writeMsg(bufferedWriter, new ApproveRequest(approve));
+                }
+            }
+        } catch (IOException e) {
+            logger.logWarn("Update thread received IO exception on socket.");
+            throw new RuntimeException(e);
         }
 
     }
