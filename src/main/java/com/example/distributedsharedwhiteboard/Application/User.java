@@ -25,7 +25,7 @@ public class User {
     private ObservableList<ShapeDrawing> objectList;
     private ObservableList<String> msgList;
     private ObservableList<String> userList;
-    private ObservableList<String> eventList;
+    private ObservableList<ControllerCmd> eventList;
 
     private ObservableList<ShapeDrawing> undrawedList;
 
@@ -76,7 +76,7 @@ public class User {
         return userList;
     }
 
-    public ObservableList<String> getEventList() {
+    public ObservableList<ControllerCmd> getEventList() {
         return eventList;
     }
 
@@ -176,8 +176,4 @@ public class User {
             throw new RuntimeException(e);
         }
     };
-
-    protected void addTodoEvent(String event) {
-        eventList.add(event);
-    }
 }

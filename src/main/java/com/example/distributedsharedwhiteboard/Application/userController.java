@@ -83,7 +83,7 @@ public class userController {
     protected ObservableList<ShapeDrawing> drawedShapes;
     protected ObservableList<ShapeDrawing> undrawedShape;
 
-    protected ObservableList<String> todoEvents;
+    protected ObservableList<ControllerCmd> todoCmds;
 
     // Model
     private User user;
@@ -107,10 +107,9 @@ public class userController {
      */
     protected void setUp() {
         // prepare shape list
-        undrawedShape = FXCollections.observableArrayList();
         drawedShapes = FXCollections.observableArrayList();
 
-        todoEvents = FXCollections.observableArrayList();
+        todoCmds = FXCollections.observableArrayList();
 
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
@@ -189,6 +188,31 @@ public class userController {
                             // ask user to send a updateRequest to server
 
                             drawNewShape((ShapeDrawing) s);
+                        }
+                    }
+                }
+            }
+
+        });
+
+        todoCmds.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            ControllerCmd cmd = (ControllerCmd) s;
+                            switch (cmd.cmd) {
+                                case "showInfoDialog":
+                                    showInfoDialog(cmd.param);
+                                    break;
+                                case "handleQuit":
+                                    handleQuit(null);
+                                    break;
+                            }
                         }
                     }
                 }

@@ -96,7 +96,7 @@ public class managerController extends userController {
         Bindings.bindContentBidirectional(userList.getItems(),manager.getUserList());
 
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
-        Bindings.bindContentBidirectional(manager.getEventList(),todoEvents);
+        Bindings.bindContentBidirectional(manager.getEventList(), todoCmds);
 
         manager.getUndrawedList().addListener(new ListChangeListener() {
             @Override
@@ -116,7 +116,7 @@ public class managerController extends userController {
 
         });
 
-        todoEvents.addListener(new ListChangeListener() {
+        todoCmds.addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
 
@@ -125,10 +125,16 @@ public class managerController extends userController {
                     // if anything was added to list
                     if (c.wasAdded()) {
                         for (Object s : c.getAddedSubList()) {
-                            String event = s.toString();
-                            switch (event) {
+                            ControllerCmd cmd = (ControllerCmd) s;
+                            switch (cmd.cmd) {
+                                case "showInfoDialog":
+                                    showInfoDialog(cmd.param);
+                                    break;
                                 case "showJoinRequest":
-                                    showJoinRequest("Yvonne");
+                                    showJoinRequest(cmd.param);
+                                    break;
+                                case "handleQuit":
+                                    handleQuit(null);
                                     break;
                             }
                         }
@@ -589,6 +595,14 @@ public class managerController extends userController {
         }
     }
 
+    /**
+     * Invoke this message when a manager want to kick out a specified user
+     * @param username - the username of kicked user
+     */
+    protected void KickOutUser(String username) {
+        manager.sendKickUserMsg(username);
+        System.out.println("kick out " + username);
+    }
 
     public void setStage(Stage stage) {
         this.stage = stage;
