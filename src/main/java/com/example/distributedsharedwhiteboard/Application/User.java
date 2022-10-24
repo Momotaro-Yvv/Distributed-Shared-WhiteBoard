@@ -21,25 +21,24 @@ public class User {
     private Boolean isManager = false;
     private SimpleStringProperty userName;
 
-    private Logger logger;
+    protected Logger logger;
 
 //    bidirectionalList
     private ObservableList<ShapeDrawing> objectList;
     private ObservableList<String> msgList;
     private ObservableList<String> userList;
+    private ObservableList<String> eventList;
 
     // Connection
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
+    protected BufferedReader bufferedReader;
+    protected BufferedWriter bufferedWriter;
 
-    private ServerSocket serverSocket;
     private UpdateThread updateThread;
 
-//    protected Queue<ShapeDrawing> undrawedShapes;
-//    protected Queue<ShapeDrawing> unShapes;
+    protected userController controller;
 
     //Constructors
     public User(String username, Socket socket) throws IOException {
@@ -47,6 +46,7 @@ public class User {
         this.objectList = FXCollections.observableArrayList();
         this.msgList = FXCollections.observableArrayList();
         this.userList = FXCollections.observableArrayList();
+        this.eventList = FXCollections.observableArrayList();
         this.userList.add(username);
 
         this.socket = socket;
@@ -55,7 +55,7 @@ public class User {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.logger = new Logger();
-        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger);
+        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger, eventList);
         updateThread.start();
     };
 
@@ -73,6 +73,10 @@ public class User {
         return userList;
     }
 
+    public ObservableList<String> getEventList() {
+        return eventList;
+    }
+
     public Boolean getManager() {
         return isManager;
     }
@@ -84,7 +88,6 @@ public class User {
     public SimpleStringProperty userNameProperty() {
         return userName;
     }
-
 
     public void addMsgItem(String item) {
         this.msgList.add(item);
@@ -170,4 +173,8 @@ public class User {
             throw new RuntimeException(e);
         }
     };
+
+    protected void addTodoEvent(String event) {
+        eventList.add(event);
+    }
 }

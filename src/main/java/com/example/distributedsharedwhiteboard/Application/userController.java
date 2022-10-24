@@ -79,6 +79,8 @@ public class userController {
 
     protected ObservableList<ShapeDrawing> drawedShapes;
 
+    protected ObservableList<String> todoEvents;
+
     // Model
     private User user;
 
@@ -102,6 +104,8 @@ public class userController {
     protected void setUp() {
         // prepare shape list
         drawedShapes = FXCollections.observableArrayList();
+
+        todoEvents = FXCollections.observableArrayList();
 
         // select freehand by default
         drawMode.getToggles().get(0).setSelected(true);
