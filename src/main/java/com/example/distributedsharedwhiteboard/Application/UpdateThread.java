@@ -25,12 +25,15 @@ public class UpdateThread extends Thread {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private ObservableList<String> eventList;
+    private userController controller;
 
-    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger, ObservableList<String> eventList) {
+    public UpdateThread(BufferedReader bufferedReader, BufferedWriter bufferedWriter, Logger logger,
+                        ObservableList<String> eventList, userController controller) {
         this.logger = logger;
         this.bufferedReader = bufferedReader;
         this.bufferedWriter = bufferedWriter;
         this.eventList = eventList;
+        this.controller = controller;
     }
 
     @Override
@@ -46,7 +49,9 @@ public class UpdateThread extends Thread {
                     System.out.println("ApproveRequest: " + userJoining + " want to join ");
 
                     Platform.runLater(() -> {
-                        eventList.add("showJoinRequest");
+//                        eventList.add("showJoinRequest");
+                        managerController mc = (managerController)controller;
+                        mc.showJoinRequest(userJoining);
                     });
                 } else if (msgFromSvr.getClass().getName() == DrawReply.class.getName()) {
                     DrawReply drawReply = (DrawReply) msgFromSvr;

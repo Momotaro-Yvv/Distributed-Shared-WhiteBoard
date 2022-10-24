@@ -28,7 +28,7 @@ public class User {
     private ObservableList<String> eventList;
 
     // Connection
-    private Socket socket;
+    protected Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     protected BufferedReader bufferedReader;
@@ -53,7 +53,7 @@ public class User {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.logger = new Logger();
-        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger);
+        updateThread = new UpdateThread(bufferedReader, bufferedWriter, logger, eventList, controller);
         updateThread.start();
     };
 
@@ -146,7 +146,7 @@ public class User {
 
     protected void sendDrawMsg(ShapeDrawing shape) {
         try {
-            writeMsg(bufferedWriter, new DrawRequest(userName.getName(), shape));
+            writeMsg(bufferedWriter, new DrawRequest(userName.getValue(), shape));
         } catch (IOException e) {
             logger.logError("Failed to send DrawRequest...");
             throw new RuntimeException(e);
@@ -156,7 +156,7 @@ public class User {
 
     protected void sendChatMsg(String msg){
         try {
-            writeMsg(bufferedWriter, new SendMsgRequest(userName.getName(), msg));
+            writeMsg(bufferedWriter, new SendMsgRequest(userName.getValue(), msg));
         } catch (IOException e) {
             logger.logError("Failed to send SendMsgRequest...");
             throw new RuntimeException(e);
@@ -165,7 +165,7 @@ public class User {
 
     protected void sendQuitMsg(){
         try {
-            writeMsg(bufferedWriter, new QuitRequest(userName.getName()));
+            writeMsg(bufferedWriter, new QuitRequest(userName.getValue()));
         } catch (IOException e) {
             logger.logError("Failed to send QuitRequest...");
             throw new RuntimeException(e);

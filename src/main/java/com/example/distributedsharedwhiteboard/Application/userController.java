@@ -156,6 +156,8 @@ public class userController {
     public void initialize() {
         user = JoinWhiteBoard.getUser();
         System.out.println("User set up!");
+        // TODO: find a way to access the controller
+        user.controller = this;
 
         // set up default settings
         setUp();
@@ -167,24 +169,24 @@ public class userController {
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
 
-        drawedShapes.addListener(new ListChangeListener() {
-            @Override
-            public void onChanged(ListChangeListener.Change c) {
-
-                while (c.next()) {
-
-                    // if anything was added to list
-                    if (c.wasAdded()) {
-                        for (Object s : c.getAddedSubList()) {
-                            // ask user to send a updateRequest to server
-                            ShapeDrawing shape = (ShapeDrawing) s;
-                            user.sendDrawMsg(shape);
-                        }
-                    }
-                }
-            }
-
-        });
+//        drawedShapes.addListener(new ListChangeListener() {
+//            @Override
+//            public void onChanged(ListChangeListener.Change c) {
+//
+//                while (c.next()) {
+//
+//                    // if anything was added to list
+//                    if (c.wasAdded()) {
+//                        for (Object s : c.getAddedSubList()) {
+//                            // ask user to send a updateRequest to server
+//                            ShapeDrawing shape = (ShapeDrawing) s;
+//                            user.sendDrawMsg(shape);
+//                        }
+//                    }
+//                }
+//            }
+//
+//        });
     }
 
     @FXML
@@ -355,14 +357,19 @@ public class userController {
                         ys[i] = lt.getY();
                     }
                     gc.stroke();
+                    PathDrawing pathDrawing = new PathDrawing(xs, ys, colorPicker.getValue());
+                    drawedShapes.add(pathDrawing);
+                    user.sendDrawMsg(pathDrawing);
 
-                    drawedShapes.add(new PathDrawing(xs, ys, colorPicker.getValue()));
                     path.getElements().clear();
                     break;
                 case "dm_line":
                     pane.getChildren().remove(line);
 
-                    drawedShapes.add(new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY(), colorPicker.getValue()));
+                    LineDrawing lineDrawing = new LineDrawing(line.getStartX(), line.getStartY(), line.getEndX(),
+                            line.getEndY(), colorPicker.getValue());
+                    drawedShapes.add(lineDrawing);
+                    user.sendDrawMsg(lineDrawing);
 
                     // add shape to canvas via gc
                     gc.strokeLine(line.getStartX(), line.getStartY(), line.getEndX(), line.getEndY());
@@ -371,7 +378,10 @@ public class userController {
                     double sideLen = Math.min(Math.abs(endX - startX), Math.abs(endY - startY));
                     pane.getChildren().remove(circle);
 
-                    drawedShapes.add(new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY), sideLen, colorPicker.getValue()));
+                    CircleDrawing circleDrawing = new CircleDrawing(Math.min(startX, endX), Math.min(startY, endY),
+                            sideLen, colorPicker.getValue());
+                    drawedShapes.add(circleDrawing);
+                    user.sendDrawMsg(circleDrawing);
 
                     // add shape to canvas via gc
                     gc.strokeOval(Math.min(startX, endX), Math.min(startY, endY), sideLen, sideLen);
@@ -390,15 +400,19 @@ public class userController {
                             Math.max(startY, endY)
                     };
 
-                    drawedShapes.add(new TriangleDrawing(tri_xs, tri_ys, colorPicker.getValue()));
+                    TriangleDrawing triangleDrawing = new TriangleDrawing(tri_xs, tri_ys, colorPicker.getValue());
+                    user.sendDrawMsg(triangleDrawing);
+                    drawedShapes.add(triangleDrawing);
                     // add shape to canvas via gc
                     gc.strokePolygon(DoubleTodouble(tri_xs), DoubleTodouble(tri_ys), 3);
                     break;
                 case "dm_rectangle":
                     pane.getChildren().remove(rectangle);
 
-                    drawedShapes.add(new RectangularDrawing(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight(), colorPicker.getValue()));
-
+                    RectangularDrawing rectangleDrawing = new RectangularDrawing(rectangle.getX(), rectangle.getY(),
+                            rectangle.getWidth(), rectangle.getHeight(), colorPicker.getValue());
+                    drawedShapes.add(rectangleDrawing);
+                    user.sendDrawMsg(rectangleDrawing);
                     // add shape to canvas via gc
                     gc.strokeRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
                     break;
@@ -481,7 +495,9 @@ public class userController {
             gc.fillText(text, textfield.getLayoutX(), textfield.getLayoutY());
 
             // add drawed shape to list
-            drawedShapes.add(new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text, colorPicker.getValue()));
+            TextDrawing drawing = new TextDrawing(textfield.getLayoutX(), textfield.getLayoutY(), text, colorPicker.getValue());
+            user.sendDrawMsg(drawing);
+            drawedShapes.add(drawing);
 
             // update unsave status
             isUnsaved = true;

@@ -28,6 +28,7 @@ public class Manager extends User {
     //Setters
 
     //Methods
+    // TODO: try to invoke methods with controller
     void approveJoinRequest(boolean decision) {
         System.out.println("approveJoinRequest: " + decision);
         try {
@@ -40,7 +41,7 @@ public class Manager extends User {
 
     void sendKickUserMsg(String userKicked){
         try {
-            writeMsg(bufferedWriter, new KickRequest(this.userNameProperty().getName(), userKicked));
+            writeMsg(bufferedWriter, new KickRequest(this.userNameProperty().getValue(), userKicked));
         } catch (IOException e) {
             logger.logError("Failed to send KinckRequest...");
             throw new RuntimeException(e);
@@ -49,7 +50,7 @@ public class Manager extends User {
 
     void sendTerminateMsg(){
         try {
-            writeMsg(bufferedWriter, new TerminateWB(this.userNameProperty().getName()));
+            writeMsg(bufferedWriter, new TerminateWB(this.userNameProperty().getValue()));
         } catch (IOException e) {
             logger.logError("Failed to send TerminateWB Request...");
             throw new RuntimeException(e);
@@ -58,7 +59,7 @@ public class Manager extends User {
 
     void sendReloadRequest(List<ShapeDrawing> shapeDrawings){
         try {
-            writeMsg(bufferedWriter, new ReloadRequest(TransferToShapeList(shapeDrawings), this.userNameProperty().getName()));
+            writeMsg(bufferedWriter, new ReloadRequest(TransferToShapeList(shapeDrawings), this.userNameProperty().getValue()));
         } catch (IOException e) {
             logger.logError("Failed to send Reload Request...");
             throw new RuntimeException(e);

@@ -6,6 +6,7 @@ import com.example.distributedsharedwhiteboard.client.CreateWhiteBoard;
 import com.example.distributedsharedwhiteboard.Util.*;
 
 import com.example.distributedsharedwhiteboard.client.JoinWhiteBoard;
+import com.example.distributedsharedwhiteboard.message.Message;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -35,6 +36,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.example.distributedsharedwhiteboard.Util.util.readMsg;
+import static com.example.distributedsharedwhiteboard.Util.util.writeMsg;
 
 public class managerController extends userController {
 
@@ -81,6 +85,7 @@ public class managerController extends userController {
     public void initialize(){
         manager = CreateWhiteBoard.getManager();
         System.out.println("Manager set up!");
+        manager.controller = this;
 
         setUp();
 
@@ -350,8 +355,7 @@ public class managerController extends userController {
         if (result.get() == btYes) {
             // manager chose "yes
             manager.approveJoinRequest(true);
-        } else {
-            // manager chose "no"
+        }else {
             manager.approveJoinRequest(false);
         }
     }
