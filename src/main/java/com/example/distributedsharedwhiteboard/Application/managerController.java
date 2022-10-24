@@ -100,7 +100,7 @@ public class managerController extends userController {
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
         Bindings.bindContentBidirectional(manager.getEventList(),todoEvents);
 
-        drawedShapes.addListener(new ListChangeListener() {
+        manager.getUndrawedList().addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
 
@@ -110,8 +110,7 @@ public class managerController extends userController {
                     if (c.wasAdded()) {
                         for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
-                            ShapeDrawing shape = (ShapeDrawing) s;
-                            manager.sendDrawMsg(shape);
+                            drawNewShape((ShapeDrawing) s);
                         }
                     }
                 }

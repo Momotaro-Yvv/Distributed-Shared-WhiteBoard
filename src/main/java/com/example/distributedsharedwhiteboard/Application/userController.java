@@ -161,7 +161,7 @@ public class userController {
     public void initialize() {
         user = JoinWhiteBoard.getUser();
         System.out.println("User set up!");
-        // TODO: find a way to access the controller
+
         // set up default settings
         setUp();
 
@@ -173,7 +173,7 @@ public class userController {
         user.addUserItem("Test only : user1");
 //
 //        Bindings.bindContentBidirectional(undrawedShape, user.getUndrawedList());
-        undrawedShape.addListener(new ListChangeListener() {
+        user.getUndrawedList().addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
 
@@ -183,6 +183,7 @@ public class userController {
                     if (c.wasAdded()) {
                         for (Object s : c.getAddedSubList()) {
                             // ask user to send a updateRequest to server
+
                             drawNewShape((ShapeDrawing) s);
                         }
                     }
