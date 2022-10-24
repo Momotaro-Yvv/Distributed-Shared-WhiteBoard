@@ -27,7 +27,7 @@ public class ObjectsList {
         objects.clear();
     }
 
-    public List<String> getObjects(){
+    public String[] getObjects(){
         return TransferToShapeList(objects);
     }
 }

@@ -55,7 +55,7 @@ public class UpdateThread extends Thread {
                 } else if (msgFromSvr.getClass().getName() == UpdateMsgRequest.class.getName()) {
                     // add msg to GUI chat window
                 } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
-                    
+
                 } else if (msgFromSvr.getClass().getName() == UpdateShapeRequest.class.getName()) {
 
                 } else if (msgFromSvr.getClass().getName() == UpdateUserlistRequest.class.getName()){

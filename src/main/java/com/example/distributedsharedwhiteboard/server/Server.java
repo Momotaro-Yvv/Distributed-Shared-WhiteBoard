@@ -26,8 +26,6 @@ public class Server {
 
     private static InetAddress svrIPAddress;
     private static int svrPort;
-
-    private static int timeout = 2000;
     private static UserList userList;
     private static ObjectsList objectsList;
     private static MsgList msgList;
@@ -78,7 +76,6 @@ public class Server {
 
     private static void serveClient(Socket client) {
         try{
-            client.setSoTimeout(timeout);
 
             try(Socket clientSocket = client) {
                 String clientIp = client.getInetAddress().getHostAddress();
