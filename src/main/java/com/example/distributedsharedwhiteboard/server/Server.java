@@ -209,17 +209,45 @@ public class Server {
         String userName = msg.username;
 
         //Send ApproveRequest to Manager asking for approve
-        try{
+        try {
             svrLogger.logDebug("Manager's socket is : " + userList.getManagerSocket());
             DataOutputStream out = new DataOutputStream(userList.getManagerSocket().getOutputStream());
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8));
+            DataInputStream in = new DataInputStream(userList.getManagerSocket().getInputStream());
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+
             writeMsg(bw, new ApproveRequest(userName, clientSocket));
-            return true;
+
+            // need to handle manager response here
+            Message readMsg = util.readMsg(br);
+
+            if (readMsg.getClass().getName() == ApproveReply.class.getName()) {
+
+                ApproveReply approveReply = (ApproveReply) readMsg;
+
+                if (approveReply.approve) {
+                    Boolean successAddUser = userList.addAUser(userName, clientSocket);
+                    if (successAddUser) {
+                        svrLogger.logDebug("A new user:" + approveReply.username + " has been added");
+                        writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
+                        return true;
+                    } else {
+                        writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
+                    }
+                } else {
+                    writeMsg(bufferedWriter, new ErrorMsg("Manager not approve your join..."));
+                }
+
+            } else {
+                writeMsg(bw, new ErrorMsg("Excepting approveReply"));
+            }
+            return false;
+        } catch (JsonSerializationException e) {
+            throw new RuntimeException(e);
         } catch (NullPointerException e){
             writeMsg(bufferedWriter, new ErrorMsg("There is no manager yet. Please try again later."));
             return false;
         }
-
     }
 
 
@@ -298,27 +326,30 @@ public class Server {
                     util.writeMsg(bufferedWriter, new ErrorMsg("Something went wrong reloading the file"));
                 }
                 break;
-            case "com.example.distributedsharedwhiteboard.message.ApproveReply":
-                ApproveReply approveReply = (ApproveReply) message;
-                svrLogger.logDebug("Received approve reply from manager!");
-                Boolean approve = approveReply.approve;
-                if (approve){
-                        String userJoining = approveReply.username;
-                        // TODO: Something wrong here...
-                        // TODO: Already get clientIp and clientPort from approveReply, how to put them together? I need the original clientSocket to send back JoinReply
-                        Socket userSocket = new Socket(approveReply.clientIp, approveReply.clientPort);
-                        svrLogger.logDebug("userSocket:" + userSocket);
-                        Boolean successAddUser= userList.addAUser(userJoining,userSocket);
-                        if (successAddUser) {
-                            svrLogger.logDebug("A new user:"+ approveReply.username + " has been added");
-                            writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
-                        } else {
-                            writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
-                        }
-                } else {
-                    writeMsg(bufferedWriter, new ErrorMsg("Manager not approve your join..."));
-                }
-                break;
+//            case "com.example.distributedsharedwhiteboard.message.ApproveReply":
+//                ApproveReply approveReply = (ApproveReply) message;
+//                svrLogger.logDebug("Received approve reply from manager!");
+//                Boolean approve = approveReply.approve;
+//                if (approve){
+//                        String userJoining = approveReply.username;
+//                        // TODO: Something wrong here...
+//                        // TODO: Already get clientIp and clientPort from approveReply, how to put them together? I need the original clientSocket to send back JoinReply
+//
+//                        // retrieve socket of user who want to join
+//
+//                        Socket userSocket = new Socket(approveReply.clientIp, approveReply.clientPort);
+//                        svrLogger.logDebug("userSocket:" + userSocket);
+//                        Boolean successAddUser= userList.addAUser(userJoining,userSocket);
+//                        if (successAddUser) {
+//                            svrLogger.logDebug("A new user:"+ approveReply.username + " has been added");
+//                            writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
+//                        } else {
+//                            writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
+//                        }
+//                } else {
+//                    writeMsg(bufferedWriter, new ErrorMsg("Manager not approve your join..."));
+//                }
+//                break;
             default:
                 writeMsg(bufferedWriter,new ErrorMsg("handleCommand: Expecting a request message"));
 
