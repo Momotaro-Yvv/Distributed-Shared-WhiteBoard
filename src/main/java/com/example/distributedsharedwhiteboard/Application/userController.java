@@ -165,14 +165,18 @@ public class userController {
         // set up default settings
         setUp();
 
+        ObservableList<ShapeDrawing> startList = user.getObjectList();
+        for (ShapeDrawing shapeDrawing : startList) {
+            drawNewShape(shapeDrawing);
+        }
+
         // bind variables
         Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
         user.addMsgItem("test only : message"); // now can access msgHistory via msgList
 
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
         user.addUserItem("Test only : user1");
-//
-//        Bindings.bindContentBidirectional(undrawedShape, user.getUndrawedList());
+
         user.getUndrawedList().addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {
