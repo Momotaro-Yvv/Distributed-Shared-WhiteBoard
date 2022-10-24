@@ -89,7 +89,6 @@ public class UpdateThread extends Thread {
                         String line = byWhom + ": " + msg;
                         msgList.add(line);
                     };
-                    break;
 
                 } else if (msgFromSvr.getClass().getName() == UpdateDeleteUserRequest.class.getName()) {
                     UpdateDeleteUserRequest updateDeleteUserRequest = (UpdateDeleteUserRequest) msgFromSvr;
@@ -108,7 +107,6 @@ public class UpdateThread extends Thread {
                         ShapeDrawing shapeDrawing = TransferToShape(shapeString);
                         undrawedList.add(shapeDrawing);
                     }
-                    break;
                 } else if (msgFromSvr.getClass().getName() == UpdateUserlistRequest.class.getName()){
                     UpdateUserlistRequest updateUserlistRequest = (UpdateUserlistRequest) msgFromSvr;
                     String newUserName = updateUserlistRequest.newUserName;
