@@ -92,6 +92,7 @@ public class managerController extends userController {
         manager.addUserItem("Test only : user1");
 
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
+        Bindings.bindContentBidirectional(manager.getEventList(),todoEvents);
 
         drawedShapes.addListener(new ListChangeListener() {
             @Override
@@ -105,6 +106,28 @@ public class managerController extends userController {
                             // ask user to send a updateRequest to server
                             ShapeDrawing shape = (ShapeDrawing) s;
                             manager.sendDrawMsg(shape);
+                        }
+                    }
+                }
+            }
+
+        });
+
+        todoEvents.addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change c) {
+
+                while (c.next()) {
+
+                    // if anything was added to list
+                    if (c.wasAdded()) {
+                        for (Object s : c.getAddedSubList()) {
+                            String event = s.toString();
+                            switch (event) {
+                                case "showJoinRequest":
+                                    showJoinRequest("testuser");
+                                    break;
+                            }
                         }
                     }
                 }

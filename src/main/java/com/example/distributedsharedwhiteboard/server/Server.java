@@ -78,7 +78,7 @@ public class Server {
 
     private static void serveClient(Socket client) {
         try{
-            client.setSoTimeout(timeout);
+//            client.setSoTimeout(timeout);
 
             try(Socket clientSocket = client) {
                 String clientIp = client.getInetAddress().getHostAddress();
@@ -132,6 +132,7 @@ public class Server {
                 }
             } catch (IOException e) {
                 svrLogger.logError("Encounter IOException");
+                e.printStackTrace();
                 throw new IOException(e);
             } catch (JsonSerializationException e) {
                 svrLogger.logError("Encounter Json Serialization Exception.");
