@@ -34,11 +34,4 @@ public class UserApplication extends Application {
         launch(args);
     }
 
-    public static void setUser(User user) {
-        UserApplication.user = user;
-    }
-
-    public static User getUser() {
-        return user;
-    }
 }

@@ -46,7 +46,6 @@ public class User {
         this.userList = FXCollections.observableArrayList();
         this.eventList = FXCollections.observableArrayList();
         this.undrawedList = FXCollections.observableArrayList();
-        this.userList.add(username);
 
         this.socket = socket;
         this.inputStream = socket.getInputStream();

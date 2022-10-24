@@ -91,11 +91,9 @@ public class managerController extends userController {
         setUp();
 
         // bind variables
+        System.out.println("USER LIST: " + manager.getUserList());
         Bindings.bindContentBidirectional(msgHistory.getItems(),manager.getMsgList());
-//        manager.addMsgItem("test only : message"); // now can access msgHistory via msgList
-
         Bindings.bindContentBidirectional(userList.getItems(),manager.getUserList());
-//        manager.addUserItem("Test only : user1");
 
         Bindings.bindContentBidirectional(manager.getObjectList(),drawedShapes);
         Bindings.bindContentBidirectional(manager.getEventList(),todoEvents);

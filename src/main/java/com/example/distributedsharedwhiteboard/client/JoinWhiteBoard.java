@@ -91,8 +91,6 @@ public class JoinWhiteBoard {
                     String[] objectList =joinReply.objectList;
                     user = new User(username, socket);
                     user.setUserList(userList);
-
-                    user.setUserList(userList);
                     user.setObjectList(objectList);
 
                     System.out.println("Username: " + username);

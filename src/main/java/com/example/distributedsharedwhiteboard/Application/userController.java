@@ -110,6 +110,7 @@ public class userController {
         undrawedShape = FXCollections.observableArrayList();
         drawedShapes = FXCollections.observableArrayList();
 
+        //TODO: show user name
         todoEvents = FXCollections.observableArrayList();
 
         // select freehand by default
@@ -167,12 +168,9 @@ public class userController {
 
         // bind variables
         Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
-        user.addMsgItem("test only : message"); // now can access msgHistory via msgList
-
+        System.out.println("USER LIST: " + user.getUserList());
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
-        user.addUserItem("Test only : user1");
-//
-//        Bindings.bindContentBidirectional(undrawedShape, user.getUndrawedList());
+
         user.getUndrawedList().addListener(new ListChangeListener() {
             @Override
             public void onChanged(ListChangeListener.Change c) {

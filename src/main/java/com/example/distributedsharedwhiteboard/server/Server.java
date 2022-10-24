@@ -228,6 +228,7 @@ public class Server {
                     if (successAddUser) {
                         svrLogger.logDebug("A new user:" + approveReply.username + " has been added");
                         writeMsg(bufferedWriter, new JoinReply(true, userList.getAllNames(), objectsList.getObjects()));
+                        incomingUpdates.add(new UpdateUserlistRequest(userName));
                         return true;
                     } else {
                         writeMsg(bufferedWriter, new ErrorMsg("User name also been used. Try another one."));
