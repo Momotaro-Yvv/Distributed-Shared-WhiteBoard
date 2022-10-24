@@ -110,7 +110,6 @@ public class userController {
         undrawedShape = FXCollections.observableArrayList();
         drawedShapes = FXCollections.observableArrayList();
 
-        //TODO: show user name
         todoEvents = FXCollections.observableArrayList();
 
         // select freehand by default
@@ -166,10 +165,17 @@ public class userController {
         // set up default settings
         setUp();
 
+        ObservableList<ShapeDrawing> startList = user.getObjectList();
+        for (ShapeDrawing shapeDrawing : startList) {
+            drawNewShape(shapeDrawing);
+        }
+
         // bind variables
         Bindings.bindContentBidirectional(msgHistory.getItems(), user.getMsgList());
         System.out.println("USER LIST: " + user.getUserList());
         Bindings.bindContentBidirectional(userList.getItems(), user.getUserList());
+
+        user.addUserItem("Test only : user1");
 
         user.getUndrawedList().addListener(new ListChangeListener() {
             @Override

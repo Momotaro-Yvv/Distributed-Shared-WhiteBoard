@@ -88,7 +88,7 @@ public class JoinWhiteBoard {
                 JoinReply joinReply = (JoinReply)msgFromServer;
                 if (joinReply.success){
                     String[] userList = joinReply.userList;
-                    String[] objectList =joinReply.objectList;
+                    String[] objectList = joinReply.objectList;
                     user = new User(username, socket);
                     user.setUserList(userList);
                     user.setObjectList(objectList);
