@@ -2,10 +2,11 @@
  Shared whiteboards allow multiple users to draw simultaneously on a canvas.
 
 # Demo-preview
-
-![](/Users/momotaro/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/DS/DS_Project2/Distributed-Shared-WhiteBoard_DSProject2/src/main/resources/userJoin.PNG)
-![](/Users/momotaro/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/DS/DS_Project2/Distributed-Shared-WhiteBoard_DSProject2/src/main/resources/ManagerWindow.PNG)
-![](/Users/momotaro/Library/CloudStorage/OneDrive-TheUniversityofMelbourne/DS/DS_Project2/Distributed-Shared-WhiteBoard_DSProject2/src/main/resources/userJoin.PNG)
+![](src/main/resources/userJoin.PNG)
+![](src/main/resources/ManagerWindow.PNG)
+![](src/main/resources/userJoin.PNG)
+![](src/main/resources/unsave.PNG)
+![](src/main/resources/terminate.PNG)
 
 
 # Table of contents
@@ -56,4 +57,5 @@ Join exist whiteboard:
 - The manager is able to kick out a certain user by right click
 
 # Reference:
- - 
+ - JavaFx API documentation
+   https://openjfx.io/javadoc/19/
