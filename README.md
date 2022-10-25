@@ -1,5 +1,5 @@
-# Distributed Shared WhiteBoard_DSProject2
- Shared whiteboards allow multiple users to draw simultaneously on a canvas.
+# Distributed Shared WhiteBoard Project2
+ A Shared Whiteboard allowing multiple users to draw simultaneously on a canvas.
 
 # Demo-preview
 ![](src/main/resources/userJoin.PNG)
